@@ -1,0 +1,75 @@
+{
+  "videos": [
+    { "id": "v1", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "recent", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 1, "createdAt": "2025-01-15", "isVisible": true },
+    { "id": "v2", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "recent", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 2, "createdAt": "2025-01-10", "isVisible": true },
+    { "id": "v3", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "recent", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 3, "createdAt": "2025-01-05", "isVisible": true },
+    { "id": "v4", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "short", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 1, "createdAt": "2025-02-01", "isVisible": true },
+    { "id": "v5", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "short", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 2, "createdAt": "2025-02-02", "isVisible": true },
+    { "id": "v6", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "short", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 3, "createdAt": "2025-02-03", "isVisible": true },
+    { "id": "v7", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "long", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 1, "createdAt": "2025-03-01", "isVisible": true },
+    { "id": "v8", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "long", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 2, "createdAt": "2025-03-02", "isVisible": true },
+    { "id": "v9", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "long", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 3, "createdAt": "2025-03-03", "isVisible": true },
+    { "id": "v10", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "long", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 4, "createdAt": "2025-03-04", "isVisible": true },
+    { "id": "v11", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "long", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 5, "createdAt": "2025-03-05", "isVisible": true },
+    { "id": "v12", "title": "Your Video Title", "description": "", "thumbnailUrl": "", "videoUrl": "", "duration": "", "category": "long", "creatorName": "Ishan", "viewCount": "", "platform": "youtube", "order": 6, "createdAt": "2025-03-06", "isVisible": true }
+  ],
+  "testimonials": [
+    { "id": "t1", "quote": "Ishan's editing skills brought our brand story to life in a way we never imagined. The seamless transitions and attention to detail made our videos truly stand out.", "clientName": "Sarah Mitchell", "clientRole": "Marketing Director", "clientAvatar": "", "rating": 5, "order": 1, "isVisible": true },
+    { "id": "t2", "quote": "Working with Ishan was an absolute game-changer for our content. His ability to craft engaging, high-quality videos helped us capture our audience's attention like never before.", "clientName": "James Carter", "clientRole": "Founder", "clientAvatar": "", "rating": 5, "order": 2, "isVisible": true },
+    { "id": "t3", "quote": "The storytelling in Ishan's edits is phenomenal. Every video he delivers feels cinematic, polished, and perfectly aligned with our brand's vision.", "clientName": "Emily Rogers", "clientRole": "Creative Director", "clientAvatar": "", "rating": 5, "order": 3, "isVisible": true },
+    { "id": "t4", "quote": "Ishan's expertise in video editing transformed our marketing strategy. The content quality increased dramatically and so did our engagement.", "clientName": "David Chen", "clientRole": "CEO", "clientAvatar": "", "rating": 5, "order": 4, "isVisible": true }
+  ],
+  "services": [
+    { "id": "s1", "title": "Short Form Video", "description": "We craft bite-sized, high-impact edits perfect for capturing attention on platforms like Instagram Reels, YouTube Shorts, and TikTok. Our expertise ensures your short-form content is engaging, dynamic, and packs a punch within seconds.", "order": 1, "isVisible": true },
+    { "id": "s2", "title": "Thumbnail Design", "description": "Your thumbnail is your video's first impression. We create eye-catching, platform-specific thumbnails that entice viewers to click and watch. Our designs will accurately represent your content while grabbing attention in a crowded feed.", "order": 2, "isVisible": true },
+    { "id": "s3", "title": "SEO Optimization", "description": "We go beyond the edit! We optimize your video titles, descriptions, and tags to increase discoverability in search results on YouTube and other platforms. This helps your ideal audience find your content more easily.", "order": 3, "isVisible": true },
+    { "id": "s4", "title": "Consulting", "description": "Unsure where to start or need a fresh perspective? We offer personalized consultations to help you brainstorm video ideas, develop a content strategy, and optimize your approach for maximum impact on YouTube and Instagram.", "order": 4, "isVisible": true }
+  ],
+  "pricing": [
+    { "id": "p1", "planName": "Personal", "price": 999, "period": "month", "features": ["20 Short videos", "Personalized video branding", "Pause or cancel anytime", "24/7 Chat support", "Dedicated social media manager", "Unlimited revisions"], "isHighlighted": false, "order": 1, "isVisible": true },
+    { "id": "p2", "planName": "Professional", "price": 1999, "period": "month", "features": ["15 Short videos + 10 animation edits", "Personalized video branding", "Pause or cancel anytime", "24/7 Chat support", "Dedicated social media manager", "Unlimited revisions"], "isHighlighted": true, "order": 2, "isVisible": true },
+    { "id": "p3", "planName": "Business", "price": 2999, "period": "month", "features": ["Complete organic growth package", "Personalized video branding", "Pause or cancel anytime", "24/7 Chat support", "Dedicated social media manager", "Unlimited revisions"], "isHighlighted": false, "order": 3, "isVisible": true }
+  ],
+  "faqs": [
+    { "id": "f1", "question": "I have a great video idea, but I'm not sure how to get started. Can you help?", "answer": "Absolutely! We offer consultations to help you refine your ideas and create a content plan that aligns with your goals. Whether you need full production or just guidance, we're here to help.", "order": 1, "isVisible": true },
+    { "id": "f2", "question": "How can editing make my video more engaging?", "answer": "Professional editing enhances pacing, adds dynamic transitions, improves color grading, and creates a polished look that keeps viewers watching. We focus on storytelling techniques that maximize engagement and retention.", "order": 2, "isVisible": true },
+    { "id": "f3", "question": "Do you offer any special effects or motion graphics?", "answer": "Yes! We offer a range of motion graphics, visual effects, and animated elements to make your content stand out. From lower thirds to full animated intros, we can enhance your videos with professional-grade effects.", "order": 3, "isVisible": true },
+    { "id": "f4", "question": "What if I need edits for different platforms (YouTube vs. Instagram)?", "answer": "We create platform-specific edits optimized for each platform's requirements. This includes aspect ratio adjustments, pacing changes, and format-specific optimizations for YouTube, Instagram, TikTok, and more.", "order": 4, "isVisible": true },
+    { "id": "f5", "question": "How can I make my video rank higher in search results?", "answer": "We optimize your video titles, descriptions, tags, and thumbnails for SEO. We also advise on content strategy, posting schedules, and engagement tactics to improve your visibility on YouTube and other platforms.", "order": 5, "isVisible": true },
+    { "id": "f6", "question": "How much creative control do I have over the editing process?", "answer": "You have full creative control. We work closely with you throughout the process, providing drafts for review and making revisions until you're completely satisfied with the final product.", "order": 6, "isVisible": true },
+    { "id": "f7", "question": "Ready to get started? How can I contact you?", "answer": "You can book a free discovery call using the button on this page, or reach out through our social media channels. We'll discuss your project, timeline, and budget to find the perfect plan for you.", "order": 7, "isVisible": true }
+  ],
+  "inquiries": [],
+  "siteConfig": {
+    "hero": {
+      "headline": "Unleash Your Viral Potential With Pro Video Editing",
+      "subtitle": "We transform raw footage into captivating content that gets seen, shared, and loved. Take your channel to the next level with our expert editing magic.",
+      "ctaText": "Hire me",
+      "socialProofText": "Worked with 50+ clients"
+    },
+    "skills": [
+      "Management", "Problem Solving", "Branding", "Storytelling", "Scriptwriting", "Content Strategy", "Visual Effects", "Motion Graphics",
+      "Color Correction", "Audio Mixing", "Transitions & Effects", "Leadership", "Project Management", "Client Relations", "Social Media", "Analytics"
+    ],
+    "footer": {
+      "name": "Ishan",
+      "tagline": "Bringing stories to life with cinematic precision and creative flair.",
+      "socials": {
+        "linkedin": "#",
+        "instagram": "#",
+        "twitter": "#"
+      }
+    },
+    "bookingLink": "#",
+    "theme": {
+      "accentColor": "#00E676",
+      "accentTeal": "#00BFA5",
+      "accentCyan": "#26C6DA",
+      "bgPrimary": "#0B1120",
+      "bgCard": "#111827",
+      "bgCardAlt": "#1E293B",
+      "textPrimary": "#FFFFFF",
+      "textSecondary": "#9CA3AF"
+    }
+  }
+}

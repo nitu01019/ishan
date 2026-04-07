@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+import { isAuthenticated } from "@/lib/auth";
+import { getInquiries, createInquiry } from "@/lib/db";
+import type { ApiResponse, Inquiry } from "@/types";
+
+export async function GET(): Promise<NextResponse<ApiResponse<Inquiry[]>>> {
+  try {
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const inquiries = await getInquiries();
+    return NextResponse.json({ success: true, data: inquiries });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to fetch inquiries";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request): Promise<NextResponse<ApiResponse<{ id: string }>>> {
+  try {
+    const body = await request.json();
+    const { name, email, phone, projectType, budget, message, selectedPlan } = body;
+
+    if (!name || !email || !message) {
+      return NextResponse.json(
+        { success: false, error: "Name, email, and message are required" },
+        { status: 400 }
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email address" },
+        { status: 400 }
+      );
+    }
+
+    const id = await createInquiry({
+      name,
+      email,
+      phone: phone || "",
+      projectType: projectType || "other",
+      budget: budget || "",
+      message,
+      selectedPlan: selectedPlan || "",
+    });
+
+    return NextResponse.json({ success: true, data: { id } }, { status: 201 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to submit inquiry";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}

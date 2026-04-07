@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: rgb(var(--bg-primary-rgb));
+  color: rgb(var(--text-primary-rgb));
+  font-family: var(--font-body), sans-serif;
+}
+
+/* Theme colors — dynamically set by ThemeProvider */
+:root {
+  --accent-green-rgb: 0 230 118;
+  --accent-teal-rgb: 0 191 165;
+  --accent-cyan-rgb: 38 198 218;
+  --bg-primary-rgb: 11 17 32;
+  --bg-card-rgb: 17 24 39;
+  --bg-card-alt-rgb: 30 41 59;
+  --text-primary-rgb: 255 255 255;
+  --text-secondary-rgb: 156 163 175;
+  --text-muted-rgb: 107 114 128;
+
+  /* shadcn CSS variables for component compatibility */
+  --background: #0B1120;
+  --foreground: #FFFFFF;
+  --card: #111827;
+  --card-foreground: #FFFFFF;
+  --muted-foreground: #9CA3AF;
+  --border: rgba(0, 230, 118, 0.15);
+  --button-ripple-color: rgba(255, 255, 255, 0.3);
+  --primary: #00E676;
+  --primary-foreground: #000000;
+  --secondary: #1E293B;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1E293B;
+  --accent-foreground: #0B1120;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --ring: #00E676;
+  --input: #374151;
+  --popover: #111827;
+  --popover-foreground: #FFFFFF;
+}
+
+/* Marquee fade masks */
+.marquee-mask {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+}
+
+/* Marquee pause on hover */
+.marquee-row:hover .animate-scroll-left,
+.marquee-row:hover .animate-scroll-right {
+  animation-play-state: paused;
+}
+
+/* Green gradient utility */
+.gradient-green {
+  background: linear-gradient(135deg, rgb(var(--accent-green-rgb)) 0%, rgb(var(--accent-teal-rgb)) 50%, rgb(var(--accent-cyan-rgb)) 100%);
+}
+
+/* Hero glow */
+.hero-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgb(var(--accent-green-rgb) / 0.12) 0%, transparent 60%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B1120;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-left,
+  .animate-scroll-right {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Spline loader spinner */
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgb(var(--accent-green-rgb) / 0.1);
+  border-top-color: rgb(var(--accent-green-rgb));
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shine {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  to { background-position: 0% 0%; }
+}
+
+@keyframes moveBackground {
+  from { background-position: 0% 0%; }
+  to { background-position: 0% -1000%; }
+}
+
+/* Focus visible for keyboard users */
+*:focus-visible {
+  outline: 2px solid rgb(var(--accent-green-rgb));
+  outline-offset: 2px;
+}
+
+.nav-link-underline {
+  position: relative;
+}
+.nav-link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgb(var(--accent-green-rgb));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+.nav-link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}

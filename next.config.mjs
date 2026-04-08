@@ -41,7 +41,7 @@ const nextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://firebasestorage.googleapis.com https://*.firebaseio.com https://*.googleapis.com https://prod.spline.design https://apis.spline.design https://hooks.spline.design https://relayserver.spline.design https://www.gstatic.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://img.youtube.com; media-src 'self' blob: https://firebasestorage.googleapis.com; worker-src blob: 'self'; child-src blob: 'self'; frame-src https://www.youtube-nocookie.com https://prod.spline.design; frame-ancestors 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://*.spline.design; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://firebasestorage.googleapis.com https://*.firebaseio.com https://*.googleapis.com https://*.spline.design https://www.gstatic.com https://unpkg.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://img.youtube.com https://*.spline.design; media-src 'self' blob: https://firebasestorage.googleapis.com; worker-src blob: 'self' https://*.spline.design; child-src blob: 'self'; frame-src https://www.youtube-nocookie.com https://*.spline.design; frame-ancestors 'none';",
           },
           {
             key: "Permissions-Policy",

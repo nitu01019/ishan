@@ -23,10 +23,10 @@ const inter = Inter({
   display: "swap",
 });
 
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").trim() || "https://ishan.video";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://ishan.video"
-  ),
+  metadataBase: new URL(siteUrl),
   title: "Ishan | Pro Video Editing Portfolio",
   description:
     "Professional video editor specializing in YouTube content, short-form videos, thumbnails, and brand storytelling. Transform your raw footage into viral content with Ishan's expert editing.",
@@ -125,7 +125,7 @@ export default function RootLayout({
               description:
                 "Professional video editor specializing in YouTube content, short-form videos, thumbnails, and brand storytelling.",
               url:
-                process.env.NEXT_PUBLIC_SITE_URL || "https://ishan.video",
+                siteUrl,
               knowsAbout: [
                 "Video Editing",
                 "YouTube",
@@ -188,7 +188,7 @@ export default function RootLayout({
               "@type": "WebSite",
               name: "Ishan - Professional Video Editor",
               url:
-                process.env.NEXT_PUBLIC_SITE_URL || "https://ishan.video",
+                siteUrl,
               description:
                 "Professional video editing portfolio showcasing YouTube content, short-form videos, and brand storytelling.",
             }),
@@ -206,7 +206,7 @@ export default function RootLayout({
               description:
                 "Professional video editing services for creators and brands",
               url:
-                process.env.NEXT_PUBLIC_SITE_URL || "https://ishan.video",
+                siteUrl,
               priceRange: "$999 - $2999",
               aggregateRating: {
                 "@type": "AggregateRating",
@@ -314,33 +314,31 @@ export default function RootLayout({
                   "@type": "ListItem",
                   position: 1,
                   name: "Home",
-                  item:
-                    process.env.NEXT_PUBLIC_SITE_URL ||
-                    "https://ishan.video",
+                  item: siteUrl,
                 },
                 {
                   "@type": "ListItem",
                   position: 2,
                   name: "Portfolio",
-                  item: `${process.env.NEXT_PUBLIC_SITE_URL || "https://ishan.video"}/#work`,
+                  item: `${siteUrl}/#work`,
                 },
                 {
                   "@type": "ListItem",
                   position: 3,
                   name: "Services",
-                  item: `${process.env.NEXT_PUBLIC_SITE_URL || "https://ishan.video"}/#services`,
+                  item: `${siteUrl}/#services`,
                 },
                 {
                   "@type": "ListItem",
                   position: 4,
                   name: "Pricing",
-                  item: `${process.env.NEXT_PUBLIC_SITE_URL || "https://ishan.video"}/#pricing`,
+                  item: `${siteUrl}/#pricing`,
                 },
                 {
                   "@type": "ListItem",
                   position: 5,
                   name: "Contact",
-                  item: `${process.env.NEXT_PUBLIC_SITE_URL || "https://ishan.video"}/#contact`,
+                  item: `${siteUrl}/#contact`,
                 },
               ],
             }),

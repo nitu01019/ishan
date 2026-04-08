@@ -13,6 +13,12 @@ export default function Preloader() {
   const [show, setShow] = useState(true);
   const minTimeRef = useRef<number>(Date.now());
 
+  // Remove the SSR preloader overlay once this JS component mounts
+  useEffect(() => {
+    const ssrOverlay = document.getElementById("ssr-preloader");
+    if (ssrOverlay) ssrOverlay.remove();
+  }, []);
+
   useEffect(() => {
     minTimeRef.current = Date.now();
 

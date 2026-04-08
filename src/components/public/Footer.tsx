@@ -39,8 +39,8 @@ export default function Footer({ name, tagline, socials }: FooterProps) {
   ];
 
   return (
-    <footer role="contentinfo" className="border-t border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 py-16">
+    <footer role="contentinfo" className="border-t border-gray-800 pb-safe">
+      <div className="max-w-7xl mx-auto px-4 py-10 md:py-16">
         {/* Multi-column layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
           {/* Brand column */}

@@ -46,7 +46,7 @@ export default function Skills({ skills }: SkillsProps) {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="py-12 md:py-16 lg:py-20"
     >
-      <h2 className="font-heading text-5xl font-bold text-white text-center">
+      <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center">
         Skills
       </h2>
       <p className="mt-6 mx-auto max-w-2xl text-center text-text-secondary text-base md:text-lg leading-relaxed px-4">

@@ -718,9 +718,79 @@ export default function VideosPage() {
       )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* Table                                                                */}
+      {/* Mobile: Card layout                                                  */}
       {/* ------------------------------------------------------------------- */}
-      <div className="bg-bg-card rounded-2xl border border-gray-700 overflow-hidden">
+      <div className="lg:hidden flex flex-col gap-3">
+        {videos.length === 0 ? (
+          <div className="text-center text-text-muted p-8 bg-bg-card rounded-2xl border border-gray-700">
+            No videos found. Add your first video.
+          </div>
+        ) : (
+          videos.map((video) => (
+            <div
+              key={video.id}
+              onClick={() => { if (!showForm) setSelectedVideo(video); }}
+              className="bg-bg-card rounded-xl border border-gray-700 p-4 cursor-pointer hover:border-gray-600 transition-colors"
+            >
+              <div className="flex items-start gap-3">
+                {video.thumbnailUrl ? (
+                  <img
+                    src={video.thumbnailUrl}
+                    alt={video.title}
+                    className="w-16 h-12 rounded-lg object-cover flex-shrink-0"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className="w-16 h-12 rounded-lg bg-gray-700 flex items-center justify-center flex-shrink-0">
+                    <svg className="h-5 w-5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">{video.title}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="inline-block bg-accent-green/10 text-accent-green text-xs font-medium px-2 py-0.5 rounded">
+                      {video.category}
+                    </span>
+                    {video.duration && (
+                      <span className="text-text-muted text-xs">{video.duration}</span>
+                    )}
+                    <span className="text-text-muted text-xs">{video.viewCount} views</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-700/50">
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleToggleVisibility(video); }}
+                  className={`w-10 h-6 rounded-full transition-colors relative ${video.isVisible ? 'bg-accent-green' : 'bg-gray-600'}`}
+                >
+                  <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${video.isVisible ? 'left-5' : 'left-1'}`} />
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleEdit(video); }}
+                    className="text-accent-green text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-accent-green/10 transition-colors min-h-[44px] flex items-center"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(video.id); }}
+                    className="text-red-400 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-400/10 transition-colors min-h-[44px] flex items-center"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ------------------------------------------------------------------- */}
+      {/* Desktop: Table layout                                                */}
+      {/* ------------------------------------------------------------------- */}
+      <div className="hidden lg:block bg-bg-card rounded-2xl border border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -750,16 +820,13 @@ export default function VideosPage() {
                     }}
                     className="border-b border-gray-700/50 hover:bg-bg-card-alt/50 transition-colors cursor-pointer"
                   >
-                    {/* Thumbnail */}
                     <td className="p-4">
                       {video.thumbnailUrl ? (
                         <img
                           src={video.thumbnailUrl}
                           alt={video.title}
                           className="w-8 h-8 rounded object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                       ) : (
                         <div className="w-8 h-8 rounded bg-gray-700 flex items-center justify-center">
@@ -769,63 +836,32 @@ export default function VideosPage() {
                         </div>
                       )}
                     </td>
-
-                    {/* Title */}
                     <td className="p-4 text-white text-sm">{video.title}</td>
-
-                    {/* Category */}
                     <td className="p-4">
                       <span className="inline-block bg-accent-green/10 text-accent-green text-xs font-medium px-2.5 py-1 rounded-lg">
                         {video.category}
                       </span>
                     </td>
-
-                    {/* Duration */}
-                    <td className="p-4 text-text-secondary text-sm">
-                      {video.duration || '—'}
-                    </td>
-
-                    {/* Views */}
-                    <td className="p-4 text-text-secondary text-sm">
-                      {video.viewCount}
-                    </td>
-
-                    {/* Visible toggle */}
+                    <td className="p-4 text-text-secondary text-sm">{video.duration || '—'}</td>
+                    <td className="p-4 text-text-secondary text-sm">{video.viewCount}</td>
                     <td className="p-4">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleVisibility(video);
-                        }}
-                        className={`w-10 h-6 rounded-full transition-colors relative ${
-                          video.isVisible ? 'bg-accent-green' : 'bg-gray-600'
-                        }`}
+                        onClick={(e) => { e.stopPropagation(); handleToggleVisibility(video); }}
+                        className={`w-10 h-6 rounded-full transition-colors relative ${video.isVisible ? 'bg-accent-green' : 'bg-gray-600'}`}
                       >
-                        <span
-                          className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                            video.isVisible ? 'left-5' : 'left-1'
-                          }`}
-                        />
+                        <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${video.isVisible ? 'left-5' : 'left-1'}`} />
                       </button>
                     </td>
-
-                    {/* Actions */}
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(video);
-                          }}
+                          onClick={(e) => { e.stopPropagation(); handleEdit(video); }}
                           className="text-accent-green hover:text-accent-green/80 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-accent-green/10 transition-colors"
                         >
                           Edit
                         </button>
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(video.id);
-                          }}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(video.id); }}
                           className="text-red-400 hover:text-red-300 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-400/10 transition-colors"
                         >
                           Delete

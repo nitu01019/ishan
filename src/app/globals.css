@@ -102,12 +102,37 @@ body {
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .animate-scroll-left,
-  .animate-scroll-right {
+  .animate-scroll-right,
+  .animate-spin,
+  .animate-pulse,
+  .animate-ping {
     animation: none !important;
   }
 
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* Safe area insets for notched phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Landscape orientation: tighten vertical spacing */
+@media (orientation: landscape) and (max-height: 500px) {
+  section {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+}
+
+/* Prevent text overflow on small screens */
+@media (max-width: 374px) {
+  .font-heading {
+    word-break: break-word;
   }
 }
 

@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Spotlight } from "@/components/ui/spotlight";
-import { SplineScene } from "@/components/ui/splite";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
+
+// Only load Spline on desktop (lg+) to save ~500KB on mobile
+const SplineScene = dynamic(
+  () => import("@/components/ui/splite").then((mod) => mod.SplineScene),
+  { ssr: false }
+);
 
 const container = {
   hidden: { opacity: 0 },
@@ -53,31 +59,31 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
   const displaySocialProof = socialProofText || "Worked with 50+ clients";
 
   return (
-    <section aria-label="Hero" className="min-h-screen pt-16">
-      <Card className="w-full min-h-[calc(100vh-4rem)] bg-black/[0.96] relative overflow-hidden border-0 rounded-none">
+    <section aria-label="Hero" className="min-h-svh pt-16">
+      <Card className="w-full min-h-[calc(100svh-4rem)] bg-black/[0.96] relative overflow-hidden border-0 rounded-none">
         <Spotlight
-          className="from-accent-green/20 via-accent-teal/10 to-transparent"
+          className="from-accent-green/20 via-accent-teal/10 to-transparent hidden md:block"
           size={400}
         />
 
         <div className="absolute inset-0 hero-glow animate-glow-pulse pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row h-full min-h-[calc(100vh-4rem)]">
+        <div className="flex flex-col lg:flex-row h-full min-h-[calc(100svh-4rem)]">
           {/* Left: text content */}
           <motion.div
             variants={container}
             initial="hidden"
             animate="visible"
-            className="flex-1 relative z-10 flex flex-col justify-center p-8 md:p-12 lg:p-16"
+            className="flex-1 relative z-10 flex flex-col justify-center p-5 sm:p-8 md:p-12 lg:p-16"
           >
             <motion.h1
               variants={item}
-              className="font-heading text-3xl md:text-4xl lg:text-5xl xl:text-[64px] font-bold text-white leading-tight"
+              className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[64px] font-bold text-white leading-tight"
             >
               {headlineParts ? (
                 <>
                   <span>{headlineParts[0]}</span>
-                  <span className="relative inline-flex w-[180px] md:w-[240px] lg:w-[280px] justify-start overflow-hidden align-bottom">
+                  <span className="relative inline-flex w-[140px] sm:w-[180px] md:w-[240px] lg:w-[280px] justify-start overflow-hidden align-bottom">
                     {words.map((word, i) => (
                       <motion.span
                         key={i}
@@ -101,7 +107,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
               ) : (
                 <>
                   <span>Unleash Your </span>
-                  <span className="relative inline-flex w-[180px] md:w-[240px] lg:w-[280px] justify-start overflow-hidden align-bottom">
+                  <span className="relative inline-flex w-[140px] sm:w-[180px] md:w-[240px] lg:w-[280px] justify-start overflow-hidden align-bottom">
                     {words.map((word, i) => (
                       <motion.span
                         key={i}

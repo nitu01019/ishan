@@ -1,9 +1,11 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Calendar, Palette, Film, CheckCircle, Rocket } from "lucide-react";
 import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import type { TimelineItem } from "@/components/ui/radial-orbital-timeline";
 import SectionTitle from "@/components/ui/SectionTitle";
+import { useIsMobile } from "@/lib/hooks";
 
 const workflowData: TimelineItem[] = [
   {
@@ -63,7 +65,70 @@ const workflowData: TimelineItem[] = [
   },
 ];
 
-export default function Workflow() {
+const statusColors: Record<string, string> = {
+  completed: "bg-accent-green text-black border-accent-green",
+  "in-progress": "bg-white text-black border-white",
+  pending: "bg-white/10 text-white border-white/30",
+};
+
+function MobileWorkflow() {
+  return (
+    <section id="workflow" className="py-8 px-4">
+      <div className="text-center mb-6">
+        <SectionTitle text="How I Work" highlight="Work" />
+        <p className="mx-auto mt-3 max-w-lg text-center text-text-secondary text-sm">
+          A streamlined process that turns your raw footage into scroll-stopping content.
+        </p>
+      </div>
+
+      <div className="max-w-md mx-auto relative">
+        {/* Vertical line */}
+        <div className="absolute left-5 top-0 bottom-0 w-px bg-white/10" />
+
+        <div className="flex flex-col gap-6">
+          {workflowData.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                className="flex gap-4 items-start"
+              >
+                {/* Circle icon */}
+                <div
+                  className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 ${statusColors[step.status]}`}
+                >
+                  <Icon size={16} />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 bg-[#111827]/80 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-sm font-bold text-white">{step.title}</h3>
+                    <span className="text-xs text-white/40 font-mono">{step.date}</span>
+                  </div>
+                  <p className="text-xs text-white/70 leading-relaxed">{step.content}</p>
+                  {/* Energy bar */}
+                  <div className="mt-3 w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-accent-green to-accent-cyan"
+                      style={{ width: `${step.energy}%` }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DesktopWorkflow() {
   return (
     <section id="workflow" className="py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8">
       <div className="text-center mb-4">
@@ -75,4 +140,11 @@ export default function Workflow() {
       <RadialOrbitalTimeline timelineData={workflowData} />
     </section>
   );
+}
+
+export default function Workflow() {
+  const isMobile = useIsMobile();
+
+  if (isMobile) return <MobileWorkflow />;
+  return <DesktopWorkflow />;
 }

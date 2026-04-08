@@ -64,7 +64,9 @@ export function ShineBorder({
         }}
       >
         {/* Large spinning conic gradient -- clipped by parent mask to border area */}
+        {/* Paused on mobile via prefers-reduced-motion and media query */}
         <div
+          className="motion-reduce:!hidden md:[animation-play-state:running] [animation-play-state:paused]"
           style={{
             position: "absolute",
             inset: "-200%",

@@ -105,6 +105,7 @@ export default function RootLayout({
         />
         <meta name="theme-color" content="#0B1120" />
         <meta name="color-scheme" content="dark" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="font-body antialiased">
         <a
@@ -346,6 +347,32 @@ export default function RootLayout({
         />
 
         <ThemeProvider>
+          {/* SSR-visible preloader overlay — visible immediately, hidden by Preloader JS */}
+          <div
+            id="ssr-preloader"
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 9999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#0B1120",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--font-heading), serif",
+                fontSize: "clamp(1.25rem, 4vw, 2.5rem)",
+                fontWeight: 700,
+                color: "#ffffff",
+                textAlign: "center",
+                padding: "0 1rem",
+              }}
+            >
+              Getting Ishan&apos;s portfolio for you
+            </p>
+          </div>
           <Preloader />
           {children}
         </ThemeProvider>

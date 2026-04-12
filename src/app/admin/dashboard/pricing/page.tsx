@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 interface PricingPlan {
   readonly id: string;
@@ -10,6 +11,7 @@ interface PricingPlan {
   readonly features: readonly string[];
   readonly isHighlighted: boolean;
   readonly order: number;
+  readonly isVisible: boolean;
 }
 
 interface PricingFormData {
@@ -38,6 +40,7 @@ export default function PricingPage() {
   const [form, setForm] = useState<PricingFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   async function fetchPlans() {
     try {
@@ -126,15 +129,33 @@ export default function PricingPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this pricing plan?')) return;
+  async function handleDelete(id: string): Promise<void> {
+    setDeleteId(id);
+  }
 
+  async function confirmDelete(): Promise<void> {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`/api/pricing/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/pricing/${deleteId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
       await fetchPlans();
     } catch {
       setError('Failed to delete pricing plan.');
+    } finally {
+      setDeleteId(null);
+    }
+  }
+
+  async function handleToggleVisibility(plan: PricingPlan) {
+    try {
+      await fetch(`/api/pricing/${plan.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isVisible: !plan.isVisible }),
+      });
+      await fetchPlans();
+    } catch {
+      setError('Failed to update visibility.');
     }
   }
 
@@ -304,6 +325,16 @@ export default function PricingPage() {
 
               <div className="flex gap-2 pt-2 border-t border-gray-700/50">
                 <button
+                  onClick={() => handleToggleVisibility(plan)}
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    plan.isVisible
+                      ? 'text-accent-green hover:bg-accent-green/10'
+                      : 'text-gray-500 hover:bg-gray-500/10'
+                  }`}
+                >
+                  {plan.isVisible ? 'Visible' : 'Hidden'}
+                </button>
+                <button
                   onClick={() => handleEdit(plan)}
                   className="flex-1 text-accent-green hover:text-accent-green/80 text-sm font-medium py-2 rounded-lg hover:bg-accent-green/10 transition-colors"
                 >
@@ -320,6 +351,13 @@ export default function PricingPage() {
           ))
         )}
       </div>
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete Pricing Plan"
+        message="Are you sure you want to delete this pricing plan? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

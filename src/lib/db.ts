@@ -1,17 +1,6 @@
-import {
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  setDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-} from "firebase/firestore";
-
+import { supabase, isSupabaseConfigured } from "./supabase";
 import seedData from "@/data/seed.json";
-import { db, isFirebaseConfigured } from "./firebase";
+import { getVisualDefaults } from "./visual-config-defaults";
 
 import type {
   Video,
@@ -23,6 +12,8 @@ import type {
   SiteConfig,
 } from "@/types";
 
+export { getVisualDefaults } from "./visual-config-defaults";
+
 function sortByOrder<T extends { readonly order: number }>(
   items: readonly T[]
 ): T[] {
@@ -30,19 +21,17 @@ function sortByOrder<T extends { readonly order: number }>(
 }
 
 export async function getVideos(category?: string, includeHidden = false): Promise<Video[]> {
-  if (isFirebaseConfigured && db) {
+  if (isSupabaseConfigured && supabase) {
     try {
-      const videosRef = collection(db, "videos");
-      const constraints = [
-        ...(includeHidden ? [] : [where("isVisible", "==", true)]),
-        ...(category ? [where("category", "==", category)] : []),
-        orderBy("order", "asc"),
-      ];
-      const q = query(videosRef, ...constraints);
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Video);
+      let q = supabase.from("videos").select("*");
+      if (!includeHidden) q = q.eq("isVisible", true);
+      if (category) q = q.eq("category", category);
+      q = q.order("order", { ascending: true });
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as Video[];
     } catch {
-      // Fall back to seed data on Firebase error
+      // Fall back to seed data on Supabase error
     }
   }
 
@@ -55,20 +44,16 @@ export async function getVideos(category?: string, includeHidden = false): Promi
 }
 
 export async function getTestimonials(includeHidden = false): Promise<Testimonial[]> {
-  if (isFirebaseConfigured && db) {
+  if (isSupabaseConfigured && supabase) {
     try {
-      const ref = collection(db, "testimonials");
-      const constraints = [
-        ...(includeHidden ? [] : [where("isVisible", "==", true)]),
-        orderBy("order", "asc"),
-      ];
-      const q = query(ref, ...constraints);
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(
-        (d) => ({ ...d.data(), id: d.id }) as Testimonial
-      );
+      let q = supabase.from("testimonials").select("*");
+      if (!includeHidden) q = q.eq("isVisible", true);
+      q = q.order("order", { ascending: true });
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as Testimonial[];
     } catch {
-      // Fall back to seed data on Firebase error
+      // Fall back to seed data on Supabase error
     }
   }
 
@@ -78,18 +63,16 @@ export async function getTestimonials(includeHidden = false): Promise<Testimonia
 }
 
 export async function getServices(includeHidden = false): Promise<Service[]> {
-  if (isFirebaseConfigured && db) {
+  if (isSupabaseConfigured && supabase) {
     try {
-      const ref = collection(db, "services");
-      const constraints = [
-        ...(includeHidden ? [] : [where("isVisible", "==", true)]),
-        orderBy("order", "asc"),
-      ];
-      const q = query(ref, ...constraints);
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Service);
+      let q = supabase.from("services").select("*");
+      if (!includeHidden) q = q.eq("isVisible", true);
+      q = q.order("order", { ascending: true });
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as Service[];
     } catch {
-      // Fall back to seed data on Firebase error
+      // Fall back to seed data on Supabase error
     }
   }
 
@@ -99,20 +82,16 @@ export async function getServices(includeHidden = false): Promise<Service[]> {
 }
 
 export async function getPricing(includeHidden = false): Promise<PricingPlan[]> {
-  if (isFirebaseConfigured && db) {
+  if (isSupabaseConfigured && supabase) {
     try {
-      const ref = collection(db, "pricing");
-      const constraints = [
-        ...(includeHidden ? [] : [where("isVisible", "==", true)]),
-        orderBy("order", "asc"),
-      ];
-      const q = query(ref, ...constraints);
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(
-        (d) => ({ ...d.data(), id: d.id }) as PricingPlan
-      );
+      let q = supabase.from("pricing").select("*");
+      if (!includeHidden) q = q.eq("isVisible", true);
+      q = q.order("order", { ascending: true });
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as PricingPlan[];
     } catch {
-      // Fall back to seed data on Firebase error
+      // Fall back to seed data on Supabase error
     }
   }
 
@@ -121,18 +100,16 @@ export async function getPricing(includeHidden = false): Promise<PricingPlan[]> 
 }
 
 export async function getFAQs(includeHidden = false): Promise<FAQ[]> {
-  if (isFirebaseConfigured && db) {
+  if (isSupabaseConfigured && supabase) {
     try {
-      const ref = collection(db, "faqs");
-      const constraints = [
-        ...(includeHidden ? [] : [where("isVisible", "==", true)]),
-        orderBy("order", "asc"),
-      ];
-      const q = query(ref, ...constraints);
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as FAQ);
+      let q = supabase.from("faqs").select("*");
+      if (!includeHidden) q = q.eq("isVisible", true);
+      q = q.order("order", { ascending: true });
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as FAQ[];
     } catch {
-      // Fall back to seed data on Firebase error
+      // Fall back to seed data on Supabase error
     }
   }
 
@@ -142,34 +119,148 @@ export async function getFAQs(includeHidden = false): Promise<FAQ[]> {
 }
 
 export async function getSiteConfig(): Promise<SiteConfig> {
-  if (isFirebaseConfigured && db) {
+  let raw: SiteConfig;
+
+  if (isSupabaseConfigured && supabase) {
     try {
-      const docRef = doc(db, "siteConfig", "main");
-      const snapshot = await getDoc(docRef);
-      if (snapshot.exists()) {
-        return snapshot.data() as SiteConfig;
+      const { data, error } = await supabase
+        .from("site_config")
+        .select("config")
+        .eq("id", "main")
+        .single();
+      if (error) throw error;
+      if (data?.config) {
+        raw = data.config as SiteConfig;
+      } else {
+        raw = seedData.siteConfig as unknown as SiteConfig;
       }
     } catch {
-      // Fall back to seed data on Firebase error
+      // Fall back to seed data on Supabase error
+      raw = seedData.siteConfig as unknown as SiteConfig;
     }
+  } else {
+    raw = seedData.siteConfig as unknown as SiteConfig;
   }
 
-  return seedData.siteConfig as unknown as SiteConfig;
+  // Merge visual defaults so components always have complete values
+  // even when new fields are missing from the database or seed data.
+  const defaults = getVisualDefaults();
+  return {
+    ...raw,
+    navbar: raw.navbar
+      ? { ...defaults.navbar, ...raw.navbar }
+      : defaults.navbar,
+    typography: raw.typography
+      ? { ...defaults.typography, ...raw.typography }
+      : defaults.typography,
+    layouts: raw.layouts
+      ? { ...defaults.layouts, ...raw.layouts }
+      : defaults.layouts,
+    animations: raw.animations
+      ? { ...defaults.animations, ...raw.animations }
+      : defaults.animations,
+    preloader: raw.preloader
+      ? { ...defaults.preloader, ...raw.preloader }
+      : defaults.preloader,
+    sectionBackgrounds: raw.sectionBackgrounds
+      ? {
+          hero: raw.sectionBackgrounds.hero
+            ? { ...defaults.sectionBackgrounds.hero, ...raw.sectionBackgrounds.hero }
+            : defaults.sectionBackgrounds.hero,
+          videos: raw.sectionBackgrounds.videos
+            ? { ...defaults.sectionBackgrounds.videos, ...raw.sectionBackgrounds.videos }
+            : defaults.sectionBackgrounds.videos,
+          testimonials: raw.sectionBackgrounds.testimonials
+            ? { ...defaults.sectionBackgrounds.testimonials, ...raw.sectionBackgrounds.testimonials }
+            : defaults.sectionBackgrounds.testimonials,
+          pricing: raw.sectionBackgrounds.pricing
+            ? { ...defaults.sectionBackgrounds.pricing, ...raw.sectionBackgrounds.pricing }
+            : defaults.sectionBackgrounds.pricing,
+          services: raw.sectionBackgrounds.services
+            ? { ...defaults.sectionBackgrounds.services, ...raw.sectionBackgrounds.services }
+            : defaults.sectionBackgrounds.services,
+          contact: raw.sectionBackgrounds.contact
+            ? { ...defaults.sectionBackgrounds.contact, ...raw.sectionBackgrounds.contact }
+            : defaults.sectionBackgrounds.contact,
+          faq: raw.sectionBackgrounds.faq
+            ? { ...defaults.sectionBackgrounds.faq, ...raw.sectionBackgrounds.faq }
+            : defaults.sectionBackgrounds.faq,
+          workflow: raw.sectionBackgrounds.workflow
+            ? { ...defaults.sectionBackgrounds.workflow, ...raw.sectionBackgrounds.workflow }
+            : defaults.sectionBackgrounds.workflow,
+          skills: raw.sectionBackgrounds.skills
+            ? { ...defaults.sectionBackgrounds.skills, ...raw.sectionBackgrounds.skills }
+            : defaults.sectionBackgrounds.skills,
+        }
+      : defaults.sectionBackgrounds,
+  };
+}
+
+const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+function deepMerge(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>
+): Record<string, unknown> {
+  const result = { ...target };
+  for (const key of Object.keys(source)) {
+    if (DANGEROUS_KEYS.has(key)) continue;
+    const srcVal = source[key];
+    const tgtVal = target[key];
+    if (
+      srcVal !== null &&
+      typeof srcVal === "object" &&
+      !Array.isArray(srcVal) &&
+      tgtVal !== null &&
+      typeof tgtVal === "object" &&
+      !Array.isArray(tgtVal)
+    ) {
+      result[key] = deepMerge(
+        tgtVal as Record<string, unknown>,
+        srcVal as Record<string, unknown>
+      );
+    } else {
+      result[key] = srcVal;
+    }
+  }
+  return result;
+}
+
+export async function updateSiteConfig(
+  updates: Record<string, unknown>
+): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) return;
+
+  const current = await getSiteConfig();
+  const merged = deepMerge(
+    current as unknown as Record<string, unknown>,
+    updates
+  );
+
+  const { error } = await supabase
+    .from("site_config")
+    .upsert({ id: "main", config: merged });
+
+  if (error) throw error;
 }
 
 export async function createItem(
   collectionName: string,
   data: Record<string, unknown>
 ): Promise<string> {
-  if (!isFirebaseConfigured || !db) {
+  if (!isSupabaseConfigured || !supabase) {
     return "";
   }
 
   const id =
     (data.id as string | undefined) ??
     `${collectionName}_${Date.now()}`;
-  const docRef = doc(db, collectionName, id);
-  await setDoc(docRef, { ...data, id });
+
+  const { error } = await supabase
+    .from(collectionName)
+    .insert({ ...data, id });
+
+  if (error) throw error;
   return id;
 }
 
@@ -178,33 +269,43 @@ export async function updateItem(
   id: string,
   data: Record<string, unknown>
 ): Promise<void> {
-  if (!isFirebaseConfigured || !db) {
+  if (!isSupabaseConfigured || !supabase) {
     return;
   }
 
-  const docRef = doc(db, collectionName, id);
-  await setDoc(docRef, { ...data, id }, { merge: true });
+  const { error } = await supabase
+    .from(collectionName)
+    .update({ ...data, id })
+    .eq("id", id);
+
+  if (error) throw error;
 }
 
 export async function deleteItem(
   collectionName: string,
   id: string
 ): Promise<void> {
-  if (!isFirebaseConfigured || !db) {
+  if (!isSupabaseConfigured || !supabase) {
     return;
   }
 
-  const docRef = doc(db, collectionName, id);
-  await deleteDoc(docRef);
+  const { error } = await supabase
+    .from(collectionName)
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
 }
 
 export async function getInquiries(): Promise<Inquiry[]> {
-  if (isFirebaseConfigured && db) {
+  if (isSupabaseConfigured && supabase) {
     try {
-      const ref = collection(db, "inquiries");
-      const q = query(ref, orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Inquiry);
+      const { data, error } = await supabase
+        .from("inquiries")
+        .select("*")
+        .order("createdAt", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Inquiry[];
     } catch {
       // Fall back to seed data
     }
@@ -222,9 +323,11 @@ export async function createInquiry(data: Omit<Inquiry, "id" | "createdAt" | "is
     isRead: false,
   };
 
-  if (isFirebaseConfigured && db) {
-    const docRef = doc(db, "inquiries", id);
-    await setDoc(docRef, inquiry);
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase
+      .from("inquiries")
+      .insert(inquiry);
+    if (error) throw error;
     return id;
   }
 

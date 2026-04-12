@@ -7,6 +7,8 @@ import { ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Spotlight } from "@/components/ui/spotlight";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
+import { getSectionStyle } from "@/lib/section-style";
+import type { SectionBackground } from "@/types";
 
 // Only load Spline on desktop (lg+) to save ~500KB on mobile
 const SplineScene = dynamic(
@@ -31,16 +33,23 @@ const item = {
   },
 };
 
-const words = ["Viral", "Stunning", "Cinematic", "Creative", "Powerful"];
+const DEFAULT_WORDS = ["Viral", "Stunning", "Cinematic", "Creative", "Powerful"];
 
 interface HeroProps {
   readonly headline?: string;
   readonly subtitle?: string;
   readonly ctaText?: string;
   readonly socialProofText?: string;
+  readonly robotPosition?: 'left' | 'right';
+  readonly rotatingWords?: readonly string[];
+  readonly secondaryCtaText?: string;
+  readonly showSpline?: boolean;
+  readonly background?: SectionBackground;
 }
 
-export default function Hero({ headline, subtitle, ctaText, socialProofText }: HeroProps) {
+export default function Hero({ headline, subtitle, ctaText, socialProofText, robotPosition = 'right', rotatingWords, secondaryCtaText, showSpline, background }: HeroProps) {
+  const words = rotatingWords?.length ? rotatingWords : DEFAULT_WORDS;
+  const shouldShowSpline = showSpline !== false;
   const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
@@ -48,7 +57,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
       setWordIndex((prev) => (prev + 1) % words.length);
     }, 2000);
     return () => clearTimeout(timeout);
-  }, [wordIndex]);
+  }, [wordIndex, words.length]);
 
   const displayHeadline = headline || "Unleash Your {word} Potential With Pro Video Editing";
   const hasWordPlaceholder = displayHeadline.includes("{word}");
@@ -58,8 +67,10 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
   const displayCta = ctaText || "Hire me";
   const displaySocialProof = socialProofText || "Worked with 50+ clients";
 
+  const bgStyle = getSectionStyle(background);
+
   return (
-    <section aria-label="Hero" className="min-h-svh pt-16">
+    <section aria-label="Hero" className="min-h-svh pt-16" style={bgStyle}>
       <Card className="w-full min-h-[calc(100svh-4rem)] bg-black/[0.96] relative overflow-hidden border-0 rounded-none">
         <Spotlight
           className="from-accent-green/20 via-accent-teal/10 to-transparent hidden md:block"
@@ -68,7 +79,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
 
         <div className="absolute inset-0 hero-glow animate-glow-pulse pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row h-full min-h-[calc(100svh-4rem)]">
+        <div className={`flex flex-col h-full min-h-[calc(100svh-4rem)] ${robotPosition === 'left' ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
           {/* Left: text content */}
           <motion.div
             variants={container}
@@ -83,7 +94,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
               {headlineParts ? (
                 <>
                   <span>{headlineParts[0]}</span>
-                  <span className="relative inline-flex w-[140px] sm:w-[180px] md:w-[240px] lg:w-[280px] justify-start overflow-hidden align-bottom">
+                  <span className="relative inline-flex w-[160px] sm:w-[200px] md:w-[280px] lg:w-[340px] xl:w-[400px] justify-start overflow-hidden align-bottom">
                     {words.map((word, i) => (
                       <motion.span
                         key={i}
@@ -107,7 +118,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
               ) : (
                 <>
                   <span>Unleash Your </span>
-                  <span className="relative inline-flex w-[140px] sm:w-[180px] md:w-[240px] lg:w-[280px] justify-start overflow-hidden align-bottom">
+                  <span className="relative inline-flex w-[160px] sm:w-[200px] md:w-[280px] lg:w-[340px] xl:w-[400px] justify-start overflow-hidden align-bottom">
                     {words.map((word, i) => (
                       <motion.span
                         key={i}
@@ -139,12 +150,8 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
             </motion.p>
 
             <motion.div variants={item} className="mt-8 flex flex-wrap gap-4">
-              <LiquidButton variant="green" size="lg" href="#contact">
-                {displayCta} <ArrowRight className="w-4 h-4" />
-              </LiquidButton>
-              <LiquidButton variant="outline" size="lg" href="#work">
-                See portfolio <ArrowRight className="w-4 h-4" />
-              </LiquidButton>
+              <LiquidButton variant="green" size="lg" href="#contact">{displayCta}<ArrowRight className="w-4 h-4" /></LiquidButton>
+              <LiquidButton variant="outline" size="lg" href="#work">{secondaryCtaText || "See portfolio"}<ArrowRight className="w-4 h-4" /></LiquidButton>
             </motion.div>
 
             <motion.div variants={item} className="mt-10 flex items-center gap-3">
@@ -167,12 +174,14 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText }: H
           </motion.div>
 
           {/* Right: 3D Spline scene */}
-          <div className="hidden lg:block flex-1 relative">
-            <SplineScene
-              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-              className="w-full h-full"
-            />
-          </div>
+          {shouldShowSpline && (
+            <div className="hidden lg:block flex-1 relative">
+              <SplineScene
+                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                className="w-full h-full"
+              />
+            </div>
+          )}
         </div>
       </Card>
     </section>

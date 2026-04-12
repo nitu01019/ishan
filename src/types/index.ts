@@ -76,13 +76,66 @@ export interface ThemeConfig {
   readonly textSecondary: string;
 }
 
+export interface SectionBackground {
+  readonly type: 'solid' | 'gradient' | 'image';
+  readonly color: string;
+  readonly gradientFrom: string;
+  readonly gradientTo: string;
+  readonly gradientDirection: string;
+  readonly imageUrl: string;
+  readonly opacity: number;
+}
+
+export interface LayoutConfig {
+  readonly testimonials: 'cards' | 'carousel' | 'grid' | 'masonry';
+  readonly pricing: 'cards' | 'comparison' | 'stacked';
+  readonly services: 'cards' | 'timeline' | 'icons-grid';
+  readonly videos: 'grid' | 'carousel' | 'featured';
+}
+
+export interface AnimationConfig {
+  readonly cardEntrance: 'fade-up' | 'slide-in' | 'scale' | 'flip' | 'none';
+  readonly buttonHover: 'glow' | 'lift' | 'pulse' | 'none';
+  readonly scrollAnimations: boolean;
+  readonly scrollSpeed: 'slow' | 'medium' | 'fast';
+}
+
+export interface NavConfig {
+  readonly style: 'solid' | 'glass' | 'minimal';
+  readonly transparent: boolean;
+  readonly opacity: number;
+  readonly sticky: boolean;
+  readonly logoText: string;
+  readonly ctaText: string;
+  readonly bgColor?: string;
+}
+
+export interface TypographyConfig {
+  readonly headingFont: string;
+  readonly bodyFont: string;
+  readonly baseFontSize: number;
+  readonly headingScale: number;
+}
+
+export interface HeroConfig {
+  readonly headline: string;
+  readonly subtitle: string;
+  readonly ctaText: string;
+  readonly socialProofText: string;
+  readonly robotPosition?: 'left' | 'right';
+  readonly rotatingWords?: readonly string[];
+  readonly secondaryCtaText?: string;
+  readonly showSpline?: boolean;
+  readonly background?: SectionBackground;
+}
+
+export interface PreloaderConfig {
+  readonly enabled: boolean;
+  readonly loadingMessage: string;
+}
+
 export interface SiteConfig {
-  readonly hero: {
-    readonly headline: string;
-    readonly subtitle: string;
-    readonly ctaText: string;
-    readonly socialProofText: string;
-  };
+  readonly hero: HeroConfig;
   readonly skills: readonly string[];
   readonly footer: {
     readonly name: string;
@@ -95,6 +148,22 @@ export interface SiteConfig {
   };
   readonly bookingLink: string;
   readonly theme?: ThemeConfig;
+  readonly typography?: TypographyConfig;
+  readonly preloader?: PreloaderConfig;
+  readonly navbar?: NavConfig;
+  readonly layouts?: LayoutConfig;
+  readonly animations?: AnimationConfig;
+  readonly sectionBackgrounds?: {
+    readonly hero?: SectionBackground;
+    readonly videos?: SectionBackground;
+    readonly testimonials?: SectionBackground;
+    readonly pricing?: SectionBackground;
+    readonly services?: SectionBackground;
+    readonly contact?: SectionBackground;
+    readonly faq?: SectionBackground;
+    readonly workflow?: SectionBackground;
+    readonly skills?: SectionBackground;
+  };
 }
 
 export interface ApiResponse<T> {

@@ -26,14 +26,14 @@ interface StatCard {
   readonly icon: React.ComponentType<{ className?: string }>;
 }
 
-type FirebaseStatus = 'checking' | 'connected' | 'not-configured' | 'error';
+type DatabaseStatus = 'checking' | 'connected' | 'not-configured' | 'error';
 
 interface DashboardState {
   readonly totalVideos: number | null;
   readonly totalTestimonials: number | null;
   readonly unreadInquiries: number | null;
   readonly activePlans: number | null;
-  readonly firebaseStatus: FirebaseStatus;
+  readonly databaseStatus: DatabaseStatus;
   readonly loading: boolean;
 }
 
@@ -52,7 +52,7 @@ const INITIAL_STATE: DashboardState = {
   totalTestimonials: null,
   unreadInquiries: null,
   activePlans: null,
-  firebaseStatus: 'checking',
+  databaseStatus: 'checking',
   loading: true,
 };
 
@@ -84,7 +84,7 @@ async function fetchUnreadCount(url: string): Promise<number> {
   ).length;
 }
 
-async function checkFirebase(): Promise<FirebaseStatus> {
+async function checkDatabase(): Promise<DatabaseStatus> {
   try {
     const res = await fetch('/api/site-config');
     const json = await res.json();
@@ -140,13 +140,13 @@ function StatCardItem({ card }: { readonly card: StatCard }) {
   );
 }
 
-function FirebaseStatusBadge({
+function DatabaseStatusBadge({
   status,
 }: {
-  readonly status: FirebaseStatus;
+  readonly status: DatabaseStatus;
 }) {
   const config: Record<
-    FirebaseStatus,
+    DatabaseStatus,
     { color: string; bg: string; text: string }
   > = {
     checking: {
@@ -202,13 +202,13 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function loadStats() {
-      const [videos, testimonials, unread, plans, firebase] =
+      const [videos, testimonials, unread, plans, database] =
         await Promise.allSettled([
           fetchCount('/api/videos'),
           fetchCount('/api/testimonials'),
           fetchUnreadCount('/api/inquiries'),
           fetchCount('/api/pricing'),
-          checkFirebase(),
+          checkDatabase(),
         ]);
 
       setState({
@@ -220,9 +220,9 @@ export default function DashboardPage() {
           unread.status === 'fulfilled' ? unread.value : 0,
         activePlans:
           plans.status === 'fulfilled' ? plans.value : 0,
-        firebaseStatus:
-          firebase.status === 'fulfilled'
-            ? firebase.value
+        databaseStatus:
+          database.status === 'fulfilled'
+            ? database.value
             : 'error',
         loading: false,
       });
@@ -275,7 +275,7 @@ export default function DashboardPage() {
             ))}
       </div>
 
-      {/* Firebase Status Card */}
+      {/* Database Status Card */}
       <div className="bg-bg-card rounded-2xl border border-gray-700 p-6 mb-8">
         <h2 className="text-lg font-semibold text-white mb-4">
           System Status
@@ -286,9 +286,9 @@ export default function DashboardPage() {
               <div className="p-2 bg-gray-800 rounded-lg">
                 <Database className="h-4 w-4 text-text-secondary" />
               </div>
-              <span className="text-sm text-white">Firebase Firestore</span>
+              <span className="text-sm text-white">Supabase Database</span>
             </div>
-            <FirebaseStatusBadge status={state.firebaseStatus} />
+            <DatabaseStatusBadge status={state.databaseStatus} />
           </div>
 
           <div className="flex items-center justify-between">
@@ -296,14 +296,14 @@ export default function DashboardPage() {
               <div className="p-2 bg-gray-800 rounded-lg">
                 <HardDrive className="h-4 w-4 text-text-secondary" />
               </div>
-              <span className="text-sm text-white">Firebase Storage</span>
+              <span className="text-sm text-white">Supabase Storage</span>
             </div>
-            <FirebaseStatusBadge status={state.firebaseStatus} />
+            <DatabaseStatusBadge status={state.databaseStatus} />
           </div>
 
-          {state.firebaseStatus === 'not-configured' && (
+          {state.databaseStatus === 'not-configured' && (
             <p className="text-yellow-400/80 text-xs mt-2 pl-11">
-              Add your Firebase credentials in{' '}
+              Add your Supabase credentials in{' '}
               <code className="bg-yellow-400/10 px-1.5 py-0.5 rounded text-yellow-300">
                 .env.local
               </code>{' '}
@@ -355,7 +355,7 @@ export default function DashboardPage() {
             </span>
           </p>
           <p>
-            <span className="text-text-secondary">Firebase:</span>{' '}
+            <span className="text-text-secondary">Supabase:</span>{' '}
             <span className="text-white">
               Configure in{' '}
               <code className="bg-bg-card-alt px-1.5 py-0.5 rounded text-accent-green text-xs">

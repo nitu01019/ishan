@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 interface FAQ {
   readonly id: string;
@@ -30,6 +31,7 @@ export default function FAQsPage() {
   const [form, setForm] = useState<FAQFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   async function fetchFAQs() {
     try {
@@ -104,15 +106,20 @@ export default function FAQsPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this FAQ?')) return;
+  async function handleDelete(id: string): Promise<void> {
+    setDeleteId(id);
+  }
 
+  async function confirmDelete(): Promise<void> {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`/api/faqs/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/faqs/${deleteId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
       await fetchFAQs();
     } catch {
       setError('Failed to delete FAQ.');
+    } finally {
+      setDeleteId(null);
     }
   }
 
@@ -249,6 +256,9 @@ export default function FAQsPage() {
                         className={`w-10 h-6 rounded-full transition-colors relative ${
                           faq.isVisible ? 'bg-accent-green' : 'bg-gray-600'
                         }`}
+                        role="switch"
+                        aria-checked={faq.isVisible}
+                        aria-label={`Toggle visibility for FAQ: ${faq.question}`}
                       >
                         <span
                           className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
@@ -280,6 +290,13 @@ export default function FAQsPage() {
           </table>
         </div>
       </div>
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete FAQ"
+        message="Are you sure you want to delete this FAQ? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

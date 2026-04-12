@@ -11,7 +11,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "firebasestorage.googleapis.com",
+        hostname: "kzvlzgbgmetulhrlsqoq.supabase.co",
       },
       {
         protocol: "https",
@@ -41,7 +41,7 @@ const nextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://*.spline.design; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://firebasestorage.googleapis.com https://*.firebaseio.com https://*.googleapis.com https://*.spline.design https://www.gstatic.com https://unpkg.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://img.youtube.com https://*.spline.design; media-src 'self' blob: https://firebasestorage.googleapis.com; worker-src blob: 'self' https://*.spline.design; child-src blob: 'self'; frame-src https://www.youtube-nocookie.com https://*.spline.design; frame-ancestors 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://*.spline.design; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://kzvlzgbgmetulhrlsqoq.supabase.co https://*.googleapis.com https://*.spline.design https://www.gstatic.com https://unpkg.com; img-src 'self' data: blob: https://kzvlzgbgmetulhrlsqoq.supabase.co https://img.youtube.com https://*.spline.design; media-src 'self' blob: https://kzvlzgbgmetulhrlsqoq.supabase.co; worker-src blob: 'self' https://*.spline.design; child-src blob: 'self'; frame-src https://www.youtube-nocookie.com https://*.spline.design; frame-ancestors 'none';",
           },
           {
             key: "Permissions-Policy",
@@ -52,12 +52,25 @@ const nextConfig = {
       {
         source: "/api/:path*",
         headers: [
-          { key: "Cache-Control", value: "no-store, must-revalidate" },
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=10, stale-while-revalidate=59",
+          },
         ],
       },
       {
-        // Cache static assets
+        // Cache static assets (immutable, hashed filenames)
         source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        // Cache font files long-term
+        source: "/fonts/:path*",
         headers: [
           {
             key: "Cache-Control",

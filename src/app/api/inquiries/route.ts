@@ -22,9 +22,21 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<{
     const body = await request.json();
     const { name, email, phone, projectType, budget, message, selectedPlan } = body;
 
-    if (!name || !email || !message) {
+    if (!name || typeof name !== "string") {
       return NextResponse.json(
-        { success: false, error: "Name, email, and message are required" },
+        { success: false, error: "Name is required" },
+        { status: 400 }
+      );
+    }
+    if (!email || typeof email !== "string") {
+      return NextResponse.json(
+        { success: false, error: "Email is required" },
+        { status: 400 }
+      );
+    }
+    if (!message || typeof message !== "string") {
+      return NextResponse.json(
+        { success: false, error: "Message is required" },
         { status: 400 }
       );
     }
@@ -37,11 +49,16 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<{
       );
     }
 
+    const validProjectTypes = ["short-form", "long-form", "thumbnail", "seo", "consulting", "other"] as const;
+    const safeProjectType = validProjectTypes.includes(projectType as typeof validProjectTypes[number])
+      ? (projectType as typeof validProjectTypes[number])
+      : "other";
+
     const id = await createInquiry({
       name,
       email,
       phone: phone || "",
-      projectType: projectType || "other",
+      projectType: safeProjectType,
       budget: budget || "",
       message,
       selectedPlan: selectedPlan || "",

@@ -11,7 +11,23 @@ const navLinks = [
   { label: "Contact", href: "#contact" },
 ];
 
-export default function Navbar() {
+interface NavbarProps {
+  readonly logoText?: string;
+  readonly ctaText?: string;
+  readonly style?: 'glass' | 'solid' | 'minimal';
+  readonly sticky?: boolean;
+  readonly opacity?: number;
+  readonly bgColor?: string;
+}
+
+export default function Navbar({
+  logoText,
+  ctaText,
+  style = 'glass',
+  sticky = true,
+  opacity = 80,
+  bgColor = '#0B1120',
+}: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -21,22 +37,55 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const positionClass = sticky ? "fixed top-0" : "absolute top-0";
+
+  const opacityFraction = Math.min(Math.max(opacity, 0), 100) / 100;
+
+  function getScrolledClasses(): string {
+    switch (style) {
+      case 'solid':
+        return "border-b border-white/10";
+      case 'minimal':
+        return "";
+      case 'glass':
+      default:
+        return "backdrop-blur-xl border-b border-white/10";
+    }
+  }
+
+  function getScrolledStyle(): React.CSSProperties | undefined {
+    if (!scrolled) return undefined;
+
+    switch (style) {
+      case 'solid':
+        return {
+          backgroundColor: bgColor,
+          opacity: opacityFraction,
+          boxShadow: "0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+        };
+      case 'minimal':
+        return undefined;
+      case 'glass':
+      default:
+        return {
+          backgroundColor: `rgba(255, 255, 255, ${0.03 * opacityFraction})`,
+          boxShadow: "0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+        };
+    }
+  }
+
   return (
     <nav
       aria-label="Main navigation"
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "backdrop-blur-xl bg-white/[0.03] border-b border-white/10"
-          : "bg-transparent"
+      className={`${positionClass} left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? getScrolledClasses() : "bg-transparent"
       }`}
-      style={scrolled ? {
-        boxShadow: "0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
-      } : undefined}
+      style={getScrolledStyle()}
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="font-heading italic text-2xl text-accent-green" aria-label="Ishan - Home">
-          Ishan
+        <a href="#" className="font-heading italic text-2xl text-accent-green" aria-label={`${logoText || "Ishan"} - Home`}>
+          {logoText || "Ishan"}
         </a>
 
         {/* Desktop Nav */}
@@ -71,7 +120,7 @@ export default function Navbar() {
             <div className="absolute inset-0 rounded-full bg-[#00E676]" />
             <div className="absolute top-0 left-[10%] right-[10%] h-[50%] rounded-full bg-gradient-to-b from-white/40 to-transparent opacity-30" />
             <span className="relative z-10 flex items-center gap-2">
-              Hire me <ArrowRight className="w-4 h-4" />
+              {ctaText || "Hire me"} <ArrowRight className="w-4 h-4" />
             </span>
           </a>
         </div>
@@ -112,7 +161,7 @@ export default function Navbar() {
             tabIndex={mobileOpen ? 0 : -1}
             className="mt-2 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-black bg-[#00E676] hover:brightness-110 transition-all"
           >
-            Hire me <ArrowRight className="w-4 h-4" />
+            {ctaText || "Hire me"} <ArrowRight className="w-4 h-4" />
           </a>
         </div>
       </div>

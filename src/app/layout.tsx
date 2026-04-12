@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Playfair_Display, Inter } from "next/font/google";
 import ThemeProvider from "@/components/public/ThemeProvider";
+import StuckDetector from "@/components/ui/StuckDetector";
 import "./globals.css";
 
 const Preloader = dynamic(() => import("@/components/public/Preloader"), {
@@ -99,10 +100,16 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link rel="preconnect" href="https://www.youtube-nocookie.com" />
+        <link rel="dns-prefetch" href="https://www.youtube-nocookie.com" />
+        <link
+          rel="preconnect"
+          href="https://kzvlzgbgmetulhrlsqoq.supabase.co"
+        />
         <link
           rel="dns-prefetch"
-          href="https://firebasestorage.googleapis.com"
+          href="https://kzvlzgbgmetulhrlsqoq.supabase.co"
         />
+        <link rel="dns-prefetch" href="https://img.youtube.com" />
         <meta name="theme-color" content="#0B1120" />
         <meta name="color-scheme" content="dark" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -347,7 +354,11 @@ export default function RootLayout({
         />
 
         <ThemeProvider>
-          {/* SSR-visible preloader overlay — visible immediately, hidden by Preloader JS */}
+          {/* SSR preloader — auto-hides via CSS after 5s even if JS fails */}
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes ssrFadeOut { 0%,80% { opacity:1; } 100% { opacity:0; pointer-events:none; } }
+            #ssr-preloader { animation: ssrFadeOut 5s ease-in forwards; }
+          `}} />
           <div
             id="ssr-preloader"
             style={{
@@ -375,6 +386,7 @@ export default function RootLayout({
           </div>
           <Preloader />
           {children}
+          <StuckDetector />
         </ThemeProvider>
       </body>
     </html>

@@ -1,24 +1,35 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { getSectionStyle } from "@/lib/section-style";
+import { getCardVariants, getScrollSpeed } from "@/lib/animation-config";
+import type { SectionBackground, AnimationConfig } from "@/types";
 
 interface SkillsProps {
   readonly skills: readonly string[];
+  readonly background?: SectionBackground;
+  readonly animations?: AnimationConfig;
 }
 
 function MarqueeRow({
   items,
   direction,
+  scrollSpeed,
 }: {
   readonly items: readonly string[];
   readonly direction: "left" | "right";
+  readonly scrollSpeed?: number;
 }) {
   const animationClass =
     direction === "left" ? "animate-scroll-left" : "animate-scroll-right";
 
+  const durationStyle = scrollSpeed
+    ? ({ "--scroll-duration": `${scrollSpeed}s` } as React.CSSProperties)
+    : undefined;
+
   return (
     <div className="marquee-row marquee-mask overflow-hidden">
-      <div className={`flex w-max ${animationClass}`}>
+      <div className={`flex w-max ${animationClass}`} style={durationStyle}>
         {/* Render twice for seamless loop */}
         {[...items, ...items].map((skill, index) => (
           <span
@@ -33,18 +44,39 @@ function MarqueeRow({
   );
 }
 
-export default function Skills({ skills }: SkillsProps) {
+function StaticRow({ items }: { readonly items: readonly string[] }) {
+  return (
+    <div className="flex flex-wrap justify-center gap-4">
+      {items.map((skill, index) => (
+        <span
+          key={`${skill}-${index}`}
+          className="font-body font-medium text-xl text-white/80 whitespace-nowrap px-6"
+        >
+          {skill}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+export default function Skills({ skills, background, animations }: SkillsProps) {
+  if (skills.length === 0) return null;
+
+  const { item } = getCardVariants(animations);
+  const scrollSpeed = getScrollSpeed(animations);
+  const scrollEnabled = animations?.scrollAnimations !== false;
+
   const row1 = skills.slice(0, 8);
   const row2 = skills.slice(8);
 
   return (
     <motion.section
       id="skills"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={item.hidden}
+      whileInView={item.visible}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
       className="py-12 md:py-16 lg:py-20"
+      style={getSectionStyle(background)}
     >
       <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center">
         Skills
@@ -56,8 +88,17 @@ export default function Skills({ skills }: SkillsProps) {
       </p>
 
       <div className="mt-12 flex flex-col gap-8">
-        <MarqueeRow items={row1} direction="left" />
-        <MarqueeRow items={row2} direction="right" />
+        {scrollEnabled ? (
+          <>
+            <MarqueeRow items={row1} direction="left" scrollSpeed={scrollSpeed} />
+            {row2.length > 0 && <MarqueeRow items={row2} direction="right" scrollSpeed={scrollSpeed} />}
+          </>
+        ) : (
+          <>
+            <StaticRow items={row1} />
+            {row2.length > 0 && <StaticRow items={row2} />}
+          </>
+        )}
       </div>
     </motion.section>
   );

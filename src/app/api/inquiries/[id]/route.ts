@@ -1,21 +1,28 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { isAuthenticated } from "@/lib/auth";
 import { updateItem, deleteItem } from "@/lib/db";
 import type { ApiResponse } from "@/types";
 
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ): Promise<NextResponse<ApiResponse<null>>> {
   try {
     const authenticated = await isAuthenticated();
     if (!authenticated) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
-    const { id } = await params;
-    const body = await request.json();
+    const { id } = await context.params;
+    const body = await request.json() as Record<string, unknown>;
     await updateItem("inquiries", id, body);
-    return NextResponse.json({ success: true });
+    revalidatePath("/");
+
+    return NextResponse.json({ success: true, data: null });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to update inquiry";
     return NextResponse.json({ success: false, error: message }, { status: 500 });
@@ -24,18 +31,20 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ): Promise<NextResponse<ApiResponse<null>>> {
   try {
     const authenticated = await isAuthenticated();
     if (!authenticated) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
-    const { id } = await params;
+    const { id } = await context.params;
     await deleteItem("inquiries", id);
-    return NextResponse.json({ success: true });
+    revalidatePath("/");
+
+    return NextResponse.json({ success: true, data: null });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Deletion failed";
+    const message = error instanceof Error ? error.message : "Failed to delete inquiry";
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

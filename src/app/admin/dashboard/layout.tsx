@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, RefreshCw, ExternalLink } from 'lucide-react';
 
 interface NavItem {
   readonly label: string;
@@ -12,6 +12,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: readonly NavItem[] = [
+  { label: 'Overview', href: '/admin/dashboard', slug: 'overview' },
   { label: 'Videos', href: '/admin/dashboard/videos', slug: 'videos' },
   { label: 'Testimonials', href: '/admin/dashboard/testimonials', slug: 'testimonials' },
   { label: 'Services', href: '/admin/dashboard/services', slug: 'services' },
@@ -19,6 +20,10 @@ const NAV_ITEMS: readonly NavItem[] = [
   { label: 'FAQs', href: '/admin/dashboard/faqs', slug: 'faqs' },
   { label: 'Inquiries', href: '/admin/dashboard/inquiries', slug: 'inquiries' },
   { label: 'Theme', href: '/admin/dashboard/theme', slug: 'theme' },
+  { label: 'Section Styles', href: '/admin/dashboard/section-styles', slug: 'section-styles' },
+  { label: 'Layouts', href: '/admin/dashboard/layouts', slug: 'layouts' },
+  { label: 'Animations', href: '/admin/dashboard/animations', slug: 'animations' },
+  { label: 'Nav Style', href: '/admin/dashboard/nav-style', slug: 'nav-style' },
   { label: 'Settings', href: '/admin/dashboard/settings', slug: 'settings' },
 ] as const;
 
@@ -34,6 +39,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
+  const handleRefresh = useCallback(() => {
+    window.location.reload();
+  }, []);
 
   useEffect(() => {
     async function checkAuth() {
@@ -78,11 +87,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const sidebarContent = (
     <>
-      <h2 className="text-xl font-bold text-white mb-8">Dashboard</h2>
+      <h2 className="text-xl font-bold text-white mb-4">Dashboard</h2>
+
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 mb-6 px-4 py-2.5 rounded-xl bg-accent-green text-black text-sm font-semibold hover:bg-accent-green/90 transition-colors"
+      >
+        View Portfolio
+        <ExternalLink size={16} />
+      </a>
 
       <nav className="flex-1 space-y-1">
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname.includes(item.slug);
+          const isActive =
+            item.href === '/admin/dashboard'
+              ? pathname === '/admin/dashboard'
+              : pathname.startsWith(item.href);
           return (
             <Link
               key={item.slug}
@@ -121,6 +143,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <Menu size={24} />
         </button>
         <span className="ml-3 text-white font-bold text-lg">Dashboard</span>
+        <button
+          onClick={handleRefresh}
+          className="ml-auto text-text-secondary hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+          aria-label="Refresh page"
+        >
+          <RefreshCw size={18} />
+        </button>
       </div>
 
       {/* Mobile sidebar backdrop */}
@@ -138,7 +167,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white">Dashboard</h2>
           <button
             onClick={closeSidebar}
@@ -149,9 +178,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </button>
         </div>
 
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 mb-6 px-4 py-2.5 rounded-xl bg-accent-green text-black text-sm font-semibold hover:bg-accent-green/90 transition-colors"
+        >
+          View Portfolio
+          <ExternalLink size={16} />
+        </a>
+
         <nav className="flex-1 space-y-1">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname.includes(item.slug);
+            const isActive =
+              item.href === '/admin/dashboard'
+                ? pathname === '/admin/dashboard'
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.slug}
@@ -181,6 +223,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <aside className="hidden lg:flex fixed top-0 left-0 w-64 h-screen bg-bg-card border-r border-gray-700 flex-col p-6">
         {sidebarContent}
       </aside>
+
+      {/* Desktop refresh button */}
+      <div className="hidden lg:flex fixed top-4 right-4 z-20">
+        <button
+          onClick={handleRefresh}
+          className="flex items-center gap-2 text-text-secondary hover:text-white px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+          aria-label="Refresh page"
+        >
+          <RefreshCw size={16} />
+          Refresh
+        </button>
+      </div>
 
       {/* Main Content */}
       <main className="pt-14 lg:pt-0 lg:ml-64 p-4 sm:p-6 lg:p-8 min-h-screen">{children}</main>

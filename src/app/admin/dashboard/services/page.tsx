@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 interface Service {
   readonly id: string;
@@ -30,6 +31,7 @@ export default function ServicesPage() {
   const [form, setForm] = useState<ServiceFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   async function fetchServices() {
     try {
@@ -104,15 +106,20 @@ export default function ServicesPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this service?')) return;
+  async function handleDelete(id: string): Promise<void> {
+    setDeleteId(id);
+  }
 
+  async function confirmDelete(): Promise<void> {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/services/${deleteId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
       await fetchServices();
     } catch {
       setError('Failed to delete service.');
+    } finally {
+      setDeleteId(null);
     }
   }
 
@@ -247,6 +254,9 @@ export default function ServicesPage() {
                         className={`w-10 h-6 rounded-full transition-colors relative ${
                           service.isVisible ? 'bg-accent-green' : 'bg-gray-600'
                         }`}
+                        role="switch"
+                        aria-checked={service.isVisible}
+                        aria-label={`Toggle visibility for ${service.title}`}
                       >
                         <span
                           className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
@@ -278,6 +288,13 @@ export default function ServicesPage() {
           </table>
         </div>
       </div>
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete Service"
+        message="Are you sure you want to delete this service? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

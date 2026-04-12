@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import type { TypographyConfig, NavConfig } from "@/types";
 
 function hexToRgb(hex: string): string {
   const h = hex.replace("#", "");
@@ -46,33 +47,79 @@ function applyTheme(theme: ThemeColors) {
   }
 }
 
+function applyTypography(typography: TypographyConfig) {
+  const root = document.documentElement;
+  if (typography.headingFont) {
+    root.style.setProperty("--font-heading", typography.headingFont);
+  }
+  if (typography.bodyFont) {
+    root.style.setProperty("--font-body", typography.bodyFont);
+  }
+  if (typography.baseFontSize) {
+    root.style.setProperty("--font-base-size", `${typography.baseFontSize}px`);
+  }
+  if (typography.headingScale) {
+    root.style.setProperty("--heading-scale", String(typography.headingScale));
+  }
+}
+
+function applyNavConfig(nav: NavConfig) {
+  const root = document.documentElement;
+  if (nav.opacity !== undefined) {
+    root.style.setProperty("--nav-opacity", String(nav.opacity));
+  }
+}
+
 interface ThemeProviderProps {
   readonly children: React.ReactNode;
   readonly initialTheme?: ThemeColors;
+  readonly typography?: TypographyConfig;
+  readonly navConfig?: NavConfig;
 }
 
-export default function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
+export default function ThemeProvider({
+  children,
+  initialTheme,
+  typography,
+  navConfig,
+}: ThemeProviderProps) {
   useEffect(() => {
     if (initialTheme) {
       applyTheme(initialTheme);
-      return;
+    }
+    if (typography) {
+      applyTypography(typography);
+    }
+    if (navConfig) {
+      applyNavConfig(navConfig);
     }
 
-    async function loadTheme() {
-      try {
-        const res = await fetch("/api/site-config");
-        if (!res.ok) return;
-        const data = await res.json();
-        const theme = data.data?.theme ?? data.theme;
-        if (theme) {
-          applyTheme(theme);
+    // If no initialTheme was provided server-side, fetch from API as fallback
+    if (!initialTheme) {
+      const loadTheme = async () => {
+        try {
+          const res = await fetch("/api/site-config");
+          if (!res.ok) return;
+          const data = await res.json();
+          const theme = data.data?.theme ?? data.theme;
+          if (theme) {
+            applyTheme(theme);
+          }
+          const typo = data.data?.typography ?? data.typography;
+          if (typo) {
+            applyTypography(typo);
+          }
+          const nav = data.data?.navbar ?? data.navbar;
+          if (nav) {
+            applyNavConfig(nav);
+          }
+        } catch {
+          // Silently fail — CSS defaults will apply
         }
-      } catch {
-        // Silently fail — CSS defaults will apply
-      }
+      };
+      loadTheme();
     }
-    loadTheme();
-  }, [initialTheme]);
+  }, [initialTheme, typography, navConfig]);
 
   return <>{children}</>;
 }

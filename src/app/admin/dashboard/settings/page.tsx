@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
+import ToggleSwitch from '@/components/admin/ToggleSwitch';
+import { defaultHeroConfig } from '@/lib/visual-config-defaults';
 
 interface FormState {
   heroHeadline: string;
@@ -14,6 +16,10 @@ interface FormState {
   instagram: string;
   twitter: string;
   bookingLink: string;
+  robotPosition: 'left' | 'right';
+  showSpline: boolean;
+  rotatingWords: string;
+  secondaryCtaText: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -28,6 +34,10 @@ const EMPTY_FORM: FormState = {
   instagram: '',
   twitter: '',
   bookingLink: '',
+  robotPosition: 'right',
+  showSpline: true,
+  rotatingWords: (defaultHeroConfig.rotatingWords ?? ['Viral', 'Stunning', 'Cinematic', 'Creative', 'Powerful']).join(', '),
+  secondaryCtaText: defaultHeroConfig.secondaryCtaText ?? 'See portfolio',
 };
 
 export default function SettingsPage() {
@@ -61,6 +71,12 @@ export default function SettingsPage() {
           instagram: config.footer?.socials?.instagram ?? '',
           twitter: config.footer?.socials?.twitter ?? '',
           bookingLink: config.bookingLink ?? '',
+          robotPosition: config.hero?.robotPosition ?? 'right',
+          showSpline: config.hero?.showSpline ?? true,
+          rotatingWords: Array.isArray(config.hero?.rotatingWords)
+            ? config.hero.rotatingWords.join(', ')
+            : (defaultHeroConfig.rotatingWords ?? []).join(', '),
+          secondaryCtaText: config.hero?.secondaryCtaText ?? defaultHeroConfig.secondaryCtaText ?? 'See portfolio',
         });
       } catch {
         setError('Failed to load site configuration.');
@@ -84,6 +100,13 @@ export default function SettingsPage() {
         subtitle: form.heroSubtitle,
         ctaText: form.heroCta,
         socialProofText: form.socialProofText,
+        robotPosition: form.robotPosition,
+        showSpline: form.showSpline,
+        rotatingWords: form.rotatingWords
+          .split(',')
+          .map((w) => w.trim())
+          .filter((w) => w.length > 0),
+        secondaryCtaText: form.secondaryCtaText,
       },
       skills: form.skills
         .split(',')
@@ -121,7 +144,7 @@ export default function SettingsPage() {
     }
   }
 
-  function updateField(field: keyof FormState, value: string) {
+  function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -202,6 +225,91 @@ export default function SettingsPage() {
                   updateField('socialProofText', e.target.value)
                 }
                 placeholder="e.g. Worked with 50+ clients"
+                className="w-full bg-bg-card-alt border border-gray-700 rounded-xl p-3 text-white focus:border-accent-green focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Advanced */}
+        <div className="bg-bg-card rounded-2xl p-6 border border-gray-700">
+          <h2 className="text-lg font-semibold text-white mb-4">
+            Hero Advanced
+          </h2>
+          <hr className="border-gray-700 mb-4" />
+          <div className="space-y-6">
+            {/* Robot/Mascot Position */}
+            <div className="space-y-2">
+              <span className="block text-sm font-medium text-white">
+                Robot/Mascot Position
+              </span>
+              <span className="block text-xs text-text-secondary">
+                Choose which side the 3D mascot appears on
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateField('robotPosition', 'left')}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    form.robotPosition === 'left'
+                      ? 'bg-accent-green text-black'
+                      : 'bg-bg-card-alt border border-gray-700 text-text-secondary hover:text-white'
+                  }`}
+                >
+                  Left
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateField('robotPosition', 'right')}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    form.robotPosition === 'right'
+                      ? 'bg-accent-green text-black'
+                      : 'bg-bg-card-alt border border-gray-700 text-text-secondary hover:text-white'
+                  }`}
+                >
+                  Right
+                </button>
+              </div>
+            </div>
+
+            {/* Show 3D Scene */}
+            <ToggleSwitch
+              label="Show 3D Scene"
+              description="Toggle the Spline 3D robot scene in the hero"
+              checked={form.showSpline}
+              onChange={(v) => updateField('showSpline', v)}
+            />
+
+            {/* Rotating Words */}
+            <div>
+              <label className="block text-sm font-medium text-white mb-1">
+                Rotating Words
+              </label>
+              <span className="block text-xs text-text-secondary mb-2">
+                Comma-separated words that rotate in the headline
+              </span>
+              <input
+                type="text"
+                value={form.rotatingWords}
+                onChange={(e) => updateField('rotatingWords', e.target.value)}
+                placeholder="Viral, Stunning, Cinematic, Creative, Powerful"
+                className="w-full bg-bg-card-alt border border-gray-700 rounded-xl p-3 text-white focus:border-accent-green focus:outline-none"
+              />
+            </div>
+
+            {/* Secondary CTA Text */}
+            <div>
+              <label className="block text-sm font-medium text-white mb-1">
+                Secondary CTA Text
+              </label>
+              <span className="block text-xs text-text-secondary mb-2">
+                Text for the secondary call-to-action button
+              </span>
+              <input
+                type="text"
+                value={form.secondaryCtaText}
+                onChange={(e) => updateField('secondaryCtaText', e.target.value)}
+                placeholder="See portfolio"
                 className="w-full bg-bg-card-alt border border-gray-700 rounded-xl p-3 text-white focus:border-accent-green focus:outline-none"
               />
             </div>

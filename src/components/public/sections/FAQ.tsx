@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { FAQ } from "@/types";
+import type { FAQ, SectionBackground, AnimationConfig } from "@/types";
+import { getSectionStyle } from "@/lib/section-style";
+import { getCardVariants } from "@/lib/animation-config";
 import SectionTitle from "@/components/ui/SectionTitle";
 import Button from "@/components/ui/Button";
 
 interface FAQProps {
   readonly faqs: readonly FAQ[];
+  readonly background?: SectionBackground;
+  readonly animations?: AnimationConfig;
 }
 
 interface AccordionItemProps {
@@ -65,15 +69,17 @@ function AccordionItem({ faq, isOpen, onToggle }: AccordionItemProps) {
   );
 }
 
-export default function FAQ({ faqs }: FAQProps) {
+export default function FAQ({ faqs, background, animations: _animations }: FAQProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  if (faqs.length === 0) return null;
 
   const handleToggle = (index: number) => {
     setOpenIndex((prev) => (prev === index ? null : index));
   };
 
   return (
-    <section id="faq" className="py-12 md:py-16 lg:py-20 px-4 md:px-8 lg:px-16">
+    <section id="faq" className="py-12 md:py-16 lg:py-20 px-4 md:px-8 lg:px-16" style={getSectionStyle(background)}>
       <SectionTitle text="Frequently Asked Questions" highlight="Asked Questions" />
 
       <div className="mt-12 max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-16">

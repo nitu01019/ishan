@@ -6,6 +6,9 @@ import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import type { TimelineItem } from "@/components/ui/radial-orbital-timeline";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { useIsMobile } from "@/lib/hooks";
+import { getSectionStyle } from "@/lib/section-style";
+import { getCardVariants } from "@/lib/animation-config";
+import type { SectionBackground, AnimationConfig } from "@/types";
 
 const workflowData: TimelineItem[] = [
   {
@@ -71,9 +74,16 @@ const statusColors: Record<string, string> = {
   pending: "bg-white/10 text-white border-white/30",
 };
 
-function MobileWorkflow() {
+interface WorkflowProps {
+  readonly background?: SectionBackground;
+  readonly animations?: AnimationConfig;
+}
+
+function MobileWorkflow({ background, animations }: WorkflowProps) {
+  const { item } = getCardVariants(animations);
+
   return (
-    <section id="workflow" className="py-8 px-4">
+    <section id="workflow" className="py-8 px-4" style={getSectionStyle(background)}>
       <div className="text-center mb-6">
         <SectionTitle text="How I Work" highlight="Work" />
         <p className="mx-auto mt-3 max-w-lg text-center text-text-secondary text-sm">
@@ -86,15 +96,14 @@ function MobileWorkflow() {
         <div className="absolute left-5 top-0 bottom-0 w-px bg-white/10" />
 
         <div className="flex flex-col gap-6">
-          {workflowData.map((step, index) => {
+          {workflowData.map((step) => {
             const Icon = step.icon;
             return (
               <motion.div
                 key={step.id}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={item.hidden}
+                whileInView={item.visible}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="flex gap-4 items-start"
               >
                 {/* Circle icon */}
@@ -128,9 +137,9 @@ function MobileWorkflow() {
   );
 }
 
-function DesktopWorkflow() {
+function DesktopWorkflow({ background }: WorkflowProps) {
   return (
-    <section id="workflow" className="py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8">
+    <section id="workflow" className="py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8" style={getSectionStyle(background)}>
       <div className="text-center mb-4">
         <SectionTitle text="How I Work" highlight="Work" />
         <p className="mx-auto mt-4 max-w-lg text-center text-text-secondary">
@@ -142,9 +151,9 @@ function DesktopWorkflow() {
   );
 }
 
-export default function Workflow() {
+export default function Workflow({ background, animations }: WorkflowProps) {
   const isMobile = useIsMobile();
 
-  if (isMobile) return <MobileWorkflow />;
-  return <DesktopWorkflow />;
+  if (isMobile) return <MobileWorkflow background={background} animations={animations} />;
+  return <DesktopWorkflow background={background} />;
 }

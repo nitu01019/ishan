@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SparklesText } from "@/components/ui/sparkles-text";
 import { Progress } from "@/components/ui/progress";
 
-const MIN_DISPLAY_TIME = 2500;
+const MIN_DISPLAY_TIME = 2000;
+const HARD_TIMEOUT = 4000; // Force-hide after 4s no matter what
 
 export default function Preloader() {
   const [progress, setProgress] = useState(0);
@@ -19,6 +20,14 @@ export default function Preloader() {
     if (ssrOverlay) ssrOverlay.remove();
   }, []);
 
+  // Hard timeout — ALWAYS hide after 4 seconds, even if progress didn't finish
+  useEffect(() => {
+    const hardTimer = setTimeout(() => {
+      setShow(false);
+    }, HARD_TIMEOUT);
+    return () => clearTimeout(hardTimer);
+  }, []);
+
   useEffect(() => {
     minTimeRef.current = Date.now();
 
@@ -29,16 +38,16 @@ export default function Preloader() {
           setIsComplete(true);
           return 100;
         }
-        // Slower increments for a 2-3 second feel
+        // Faster increments to finish within 2-3 seconds
         const increment =
           prev < 40
-            ? Math.random() * 4 + 2
+            ? Math.random() * 6 + 3
             : prev < 75
-              ? Math.random() * 3 + 1
-              : Math.random() * 1.5 + 0.3;
+              ? Math.random() * 5 + 2
+              : Math.random() * 3 + 1;
         return Math.min(prev + increment, 100);
       });
-    }, 80);
+    }, 60);
 
     return () => clearInterval(timer);
   }, []);
@@ -47,7 +56,7 @@ export default function Preloader() {
     if (isComplete) {
       const elapsed = Date.now() - minTimeRef.current;
       const remaining = Math.max(0, MIN_DISPLAY_TIME - elapsed);
-      const hideTimer = setTimeout(() => setShow(false), remaining + 300);
+      const hideTimer = setTimeout(() => setShow(false), remaining + 200);
       return () => clearTimeout(hideTimer);
     }
   }, [isComplete]);

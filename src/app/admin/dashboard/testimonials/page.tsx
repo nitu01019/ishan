@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
+import { uploadFile, formatFileSize } from '@/lib/upload-manager';
 
 interface Testimonial {
   readonly id: string;
@@ -25,7 +27,10 @@ type AvatarSourceMode = 'upload' | 'url';
 interface AvatarUploadState {
   status: 'idle' | 'uploading' | 'success' | 'error';
   fileName: string;
+  fileSize: number;
   errorMessage: string;
+  progress: number;
+  abortController: AbortController | null;
 }
 
 const EMPTY_FORM: TestimonialFormData = {
@@ -39,7 +44,10 @@ const EMPTY_FORM: TestimonialFormData = {
 const INITIAL_AVATAR_UPLOAD: AvatarUploadState = {
   status: 'idle',
   fileName: '',
+  fileSize: 0,
   errorMessage: '',
+  progress: 0,
+  abortController: null,
 };
 
 const RATINGS = [1, 2, 3, 4, 5] as const;
@@ -52,6 +60,7 @@ export default function TestimonialsPage() {
   const [form, setForm] = useState<TestimonialFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Avatar upload state
   const [avatarSourceMode, setAvatarSourceMode] = useState<AvatarSourceMode>('url');
@@ -62,39 +71,47 @@ export default function TestimonialsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setAvatarUpload({ status: 'uploading', fileName: file.name, errorMessage: '' });
+    const abortController = new AbortController();
+
+    setAvatarUpload({
+      status: 'uploading',
+      fileName: file.name,
+      fileSize: file.size,
+      errorMessage: '',
+      progress: 0,
+      abortController,
+    });
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const result = await uploadFile(file, {
+        onProgress: (p) => {
+          setAvatarUpload((prev) => ({ ...prev, progress: p.percentage }));
+        },
+        signal: abortController.signal,
+      });
 
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const json = await res.json();
-
-      if (!res.ok || !json.success) {
-        const msg = json.error ?? 'Upload failed';
-        setAvatarUpload({ status: 'error', fileName: file.name, errorMessage: msg });
+      updateField('clientAvatar', result.url);
+      setAvatarUpload({
+        status: 'success',
+        fileName: file.name,
+        fileSize: file.size,
+        errorMessage: '',
+        progress: 100,
+        abortController: null,
+      });
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setAvatarUpload(INITIAL_AVATAR_UPLOAD);
         return;
       }
-
-      const url: string = json.data?.url ?? '';
-
-      if (!url) {
-        setAvatarUpload({
-          status: 'error',
-          fileName: file.name,
-          errorMessage: 'Firebase not configured — file was not stored. Add Firebase credentials in .env.local',
-        });
-        return;
-      }
-
-      updateField('clientAvatar', url);
-      setAvatarUpload({ status: 'success', fileName: file.name, errorMessage: '' });
-    } catch {
+      const msg = err instanceof Error ? err.message : 'Upload failed';
       setAvatarUpload({
         status: 'error',
         fileName: file.name,
-        errorMessage: 'Upload request failed. Check your connection.',
+        fileSize: file.size,
+        errorMessage: msg,
+        progress: 0,
+        abortController: null,
       });
     }
   }
@@ -141,6 +158,7 @@ export default function TestimonialsPage() {
   }
 
   function handleCancel() {
+    avatarUpload.abortController?.abort();
     setShowForm(false);
     setEditingId(null);
     setForm(EMPTY_FORM);
@@ -155,12 +173,20 @@ export default function TestimonialsPage() {
     setSaving(true);
     setError('');
 
+    // Validate rating is within range
+    const ratingNum = Number(form.rating);
+    if (ratingNum < 1 || ratingNum > 5 || !Number.isInteger(ratingNum)) {
+      setError('Rating must be an integer between 1 and 5.');
+      setSaving(false);
+      return;
+    }
+
     const payload = {
       clientName: form.clientName,
       clientRole: form.clientRole,
       clientAvatar: form.clientAvatar,
       quote: form.quote,
-      rating: Number(form.rating),
+      rating: ratingNum,
     };
 
     try {
@@ -184,15 +210,20 @@ export default function TestimonialsPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this testimonial?')) return;
+  async function handleDelete(id: string): Promise<void> {
+    setDeleteId(id);
+  }
 
+  async function confirmDelete(): Promise<void> {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`/api/testimonials/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/testimonials/${deleteId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
       await fetchTestimonials();
     } catch {
       setError('Failed to delete testimonial.');
+    } finally {
+      setDeleteId(null);
     }
   }
 
@@ -336,18 +367,46 @@ export default function TestimonialsPage() {
                     className="block w-full text-sm text-text-muted file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-accent-green/10 file:text-accent-green hover:file:bg-accent-green/20 file:cursor-pointer cursor-pointer"
                   />
                   {avatarUpload.status !== 'idle' && (
-                    <div className={`flex items-center gap-2 mt-1.5 text-xs ${
-                      avatarUpload.status === 'uploading' ? 'text-yellow-400' :
-                      avatarUpload.status === 'success' ? 'text-accent-green' : 'text-red-400'
-                    }`}>
-                      <span>
-                        {avatarUpload.fileName} —{' '}
-                        {avatarUpload.status === 'uploading' ? 'Uploading...' :
-                         avatarUpload.status === 'success' ? 'Uploaded' : 'Failed'}
-                      </span>
-                      {avatarUpload.errorMessage && (
-                        <span className="text-red-400 ml-1">({avatarUpload.errorMessage})</span>
+                    <div className="mt-2 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-text-muted truncate max-w-[200px]">
+                          {avatarUpload.fileName}
+                          {avatarUpload.fileSize > 0 && (
+                            <span className="ml-1 text-text-muted/60">
+                              ({formatFileSize(avatarUpload.fileSize)})
+                            </span>
+                          )}
+                        </span>
+                        {avatarUpload.status === 'uploading' && avatarUpload.abortController && (
+                          <button
+                            type="button"
+                            onClick={() => avatarUpload.abortController?.abort()}
+                            className="text-red-400 hover:text-red-300 text-xs font-medium px-2 py-0.5 rounded hover:bg-red-400/10 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                      {avatarUpload.status === 'uploading' && (
+                        <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="bg-accent-green h-1.5 rounded-full transition-all duration-300 ease-out"
+                            style={{ width: `${avatarUpload.progress}%` }}
+                          />
+                        </div>
                       )}
+                      <div className={`flex items-center gap-1.5 text-xs ${
+                        avatarUpload.status === 'uploading' ? 'text-yellow-400' :
+                        avatarUpload.status === 'success' ? 'text-accent-green' : 'text-red-400'
+                      }`}>
+                        <span>
+                          {avatarUpload.status === 'uploading' ? `Uploading... ${avatarUpload.progress}%` :
+                           avatarUpload.status === 'success' ? 'Uploaded' : 'Failed'}
+                        </span>
+                        {avatarUpload.errorMessage && (
+                          <span className="text-red-400 ml-1">({avatarUpload.errorMessage})</span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -397,8 +456,70 @@ export default function TestimonialsPage() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-bg-card rounded-2xl border border-gray-700 overflow-hidden">
+      {/* Mobile: Card layout */}
+      <div className="lg:hidden flex flex-col gap-3">
+        {testimonials.length === 0 ? (
+          <div className="text-center text-text-muted p-8 bg-bg-card rounded-2xl border border-gray-700">
+            No testimonials found. Add your first testimonial.
+          </div>
+        ) : (
+          testimonials.map((t) => (
+            <div
+              key={t.id}
+              className="bg-bg-card rounded-xl border border-gray-700 p-4"
+            >
+              <div className="flex items-start gap-3">
+                {t.clientAvatar ? (
+                  <img
+                    src={t.clientAvatar}
+                    alt={t.clientName}
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 text-text-muted text-sm">
+                    {t.clientName.charAt(0)}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium">{t.clientName}</p>
+                  <p className="text-text-muted text-xs">{t.clientRole}</p>
+                  <div className="mt-1 text-sm">{renderStars(t.rating)}</div>
+                </div>
+              </div>
+              <p className="text-text-secondary text-sm mt-2 line-clamp-2">{t.quote}</p>
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-700/50">
+                <button
+                  onClick={() => handleToggleVisibility(t)}
+                  className={`w-10 h-6 rounded-full transition-colors relative ${t.isVisible ? 'bg-accent-green' : 'bg-gray-600'}`}
+                  role="switch"
+                  aria-checked={t.isVisible}
+                  aria-label={`Toggle visibility for ${t.clientName}`}
+                >
+                  <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${t.isVisible ? 'left-5' : 'left-1'}`} />
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(t)}
+                    className="text-accent-green text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-accent-green/10 transition-colors min-h-[44px] flex items-center"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(t.id)}
+                    className="text-red-400 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-400/10 transition-colors min-h-[44px] flex items-center"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: Table layout */}
+      <div className="hidden lg:block bg-bg-card rounded-2xl border border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -431,6 +552,9 @@ export default function TestimonialsPage() {
                         className={`w-10 h-6 rounded-full transition-colors relative ${
                           t.isVisible ? 'bg-accent-green' : 'bg-gray-600'
                         }`}
+                        role="switch"
+                        aria-checked={t.isVisible}
+                        aria-label={`Toggle visibility for ${t.clientName}`}
                       >
                         <span
                           className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
@@ -462,6 +586,13 @@ export default function TestimonialsPage() {
           </table>
         </div>
       </div>
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete Testimonial"
+        message="Are you sure you want to delete this testimonial? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

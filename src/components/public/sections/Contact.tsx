@@ -4,6 +4,9 @@ import { useState, FormEvent, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
+import { getSectionStyle } from "@/lib/section-style";
+import { getCardVariants } from "@/lib/animation-config";
+import type { SectionBackground, AnimationConfig } from "@/types";
 
 interface ContactFormData {
   name: string;
@@ -220,9 +223,16 @@ function ContactForm() {
   );
 }
 
-export default function Contact() {
+interface ContactProps {
+  readonly background?: SectionBackground;
+  readonly animations?: AnimationConfig;
+}
+
+export default function Contact({ background, animations }: ContactProps) {
+  const { item } = getCardVariants(animations);
+
   return (
-    <section id="contact" className="py-12 md:py-16 lg:py-20 px-4 md:px-8 lg:px-16">
+    <section id="contact" className="py-12 md:py-16 lg:py-20 px-4 md:px-8 lg:px-16" style={getSectionStyle(background)}>
       <SectionTitle text="Let's Work Together" highlight="Together" />
       <p className="text-center text-gray-400 mt-4 max-w-2xl mx-auto text-base md:text-lg">
         Ready to elevate your content? Fill out the form and I&apos;ll get back
@@ -230,10 +240,9 @@ export default function Contact() {
       </p>
 
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={item.hidden}
+        whileInView={item.visible}
         viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
         className="mt-12 max-w-3xl mx-auto"
       >
         <div className="bg-[#111827] rounded-2xl border border-white/10 p-6 md:p-10">

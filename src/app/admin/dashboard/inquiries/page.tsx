@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 interface Inquiry {
   readonly id: string;
@@ -46,6 +47,7 @@ export default function InquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const unreadCount = inquiries.filter((inq) => !inq.isRead).length;
 
@@ -83,16 +85,20 @@ export default function InquiriesPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this inquiry?')) return;
+  async function handleDelete(id: string): Promise<void> {
+    setDeleteId(id);
+  }
 
+  async function confirmDelete(): Promise<void> {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`/api/inquiries/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/inquiries/${deleteId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
-      setExpandedId((prev) => (prev === id ? null : prev));
       await fetchInquiries();
     } catch {
       setError('Failed to delete inquiry.');
+    } finally {
+      setDeleteId(null);
     }
   }
 
@@ -274,6 +280,13 @@ export default function InquiriesPage() {
           </div>
         )}
       </div>
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete Inquiry"
+        message="Are you sure you want to delete this inquiry? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

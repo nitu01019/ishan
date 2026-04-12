@@ -214,7 +214,7 @@ function ContactForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full md:w-auto bg-accent-green text-black font-semibold px-8 py-3 rounded-xl hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full md:w-auto bg-accent-green text-black font-semibold px-8 py-3 rounded-xl hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
         >
           {submitting ? "Sending..." : "Send Message"}
         </button>

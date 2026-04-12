@@ -60,9 +60,9 @@ function TimelineLayout({ services, background, animations }: Omit<ServicesProps
                 {/* Dot on the timeline */}
                 <div className="absolute left-4 md:left-1/2 top-6 w-3 h-3 rounded-full bg-accent-green border-2 border-bg-primary -translate-x-1/2 z-10" />
 
-                {/* Card - mobile always right, desktop alternates */}
+                {/* Card - mobile always right of line, desktop alternates */}
                 <div className={`pl-12 md:pl-0 md:w-[45%] ${isLeft ? "md:mr-auto md:pr-8 md:text-right" : "md:ml-auto md:pl-8 md:text-left"}`}>
-                  <div className="rounded-2xl bg-gradient-to-br from-accent-green via-accent-teal to-accent-cyan p-5">
+                  <div className="rounded-2xl bg-gradient-to-br from-accent-green via-accent-teal to-accent-cyan p-4 md:p-5 min-h-[44px]">
                     <h3 className="text-xl font-bold text-black">{service.title}</h3>
                     <p className="text-black/80 text-sm leading-relaxed mt-2">
                       {service.description}
@@ -109,28 +109,29 @@ function IconsGridLayout({ services, background, animations }: Omit<ServicesProp
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {services.map((service, index) => (
             <motion.div
               key={service.id}
               initial={item.hidden}
               whileInView={item.visible}
               viewport={{ once: true }}
-              className="flex flex-col items-center text-center rounded-2xl border border-white/10 bg-[#111827]/80 backdrop-blur-md p-6 hover:border-accent-green/30 transition-colors"
+              className="flex flex-col items-center text-center rounded-2xl border border-white/10 bg-[#111827]/80 backdrop-blur-md p-4 md:p-6 hover:border-accent-green/30 transition-colors min-h-[44px]"
             >
               {/* Icon circle */}
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-accent-green via-accent-teal to-accent-cyan flex items-center justify-center mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-accent-green via-accent-teal to-accent-cyan flex items-center justify-center mb-3 md:mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="28" height="28" viewBox="0 0 24 24"
+                  className="w-5 h-5 md:w-7 md:h-7"
+                  viewBox="0 0 24 24"
                   fill="none" stroke="black" strokeWidth="2"
                   strokeLinecap="round" strokeLinejoin="round"
                 >
                   <path d={SERVICE_ICONS[index % SERVICE_ICONS.length]} />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">{service.title}</h3>
-              <p className="text-white/70 text-sm leading-relaxed">{service.description}</p>
+              <h3 className="text-sm md:text-lg font-bold text-white mb-1 md:mb-2">{service.title}</h3>
+              <p className="text-white/70 text-xs md:text-sm leading-relaxed">{service.description}</p>
             </motion.div>
           ))}
         </div>
@@ -175,9 +176,9 @@ function MobileServices({ services, background, animations }: Omit<ServicesProps
               initial={item.hidden}
               whileInView={item.visible}
               viewport={{ once: true }}
-              className="rounded-2xl bg-gradient-to-br from-accent-green via-accent-teal to-accent-cyan p-5"
+              className="rounded-2xl bg-gradient-to-br from-accent-green via-accent-teal to-accent-cyan p-4 sm:p-5 min-h-[44px]"
             >
-              <h3 className="text-xl font-bold text-black">{service.title}</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-black">{service.title}</h3>
               <p className="text-black/80 text-sm leading-relaxed mt-2">
                 {service.description}
               </p>

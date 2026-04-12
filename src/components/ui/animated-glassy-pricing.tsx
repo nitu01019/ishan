@@ -135,12 +135,12 @@ export const GlassyPricingCard = ({
   planName, description, price, features, buttonText, isPopular = false, buttonVariant = 'primary', href
 }: GlassyPricingCardProps) => {
   const cardClasses = `
-    backdrop-blur-[14px] backdrop-brightness-[0.91] bg-gradient-to-br rounded-2xl shadow-xl flex-1 max-w-xs px-7 py-8 flex flex-col transition-all duration-300
+    backdrop-blur-[14px] backdrop-brightness-[0.91] bg-gradient-to-br rounded-2xl shadow-xl w-full md:flex-1 md:max-w-xs px-5 md:px-7 py-8 flex flex-col transition-all duration-300
     from-white/10 to-white/5 border border-white/10
-    ${isPopular ? 'scale-105 relative ring-2 ring-accent-green/20 from-white/20 to-white/10 border-accent-green/30 shadow-2xl' : ''}
+    ${isPopular ? 'md:scale-105 relative ring-2 ring-accent-green/20 from-white/20 to-white/10 border-accent-green/30 shadow-2xl' : ''}
   `;
   const buttonClasses = `
-    mt-auto w-full py-2.5 rounded-xl font-semibold text-[14px] transition font-body
+    mt-auto w-full py-3 md:py-2.5 rounded-xl font-semibold text-[14px] transition font-body min-h-[44px]
     ${buttonVariant === 'primary'
       ? 'bg-accent-green hover:brightness-110 text-black'
       : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
@@ -155,11 +155,11 @@ export const GlassyPricingCard = ({
         </div>
       )}
       <div className="mb-3">
-        <h3 className="text-[48px] font-extralight tracking-[-0.03em] text-white font-heading">{planName}</h3>
+        <h3 className="text-[32px] md:text-[48px] font-extralight tracking-[-0.03em] text-white font-heading">{planName}</h3>
         <p className="text-[16px] text-white/70 mt-1 font-body">{description}</p>
       </div>
       <div className="my-6 flex items-baseline gap-2">
-        <span className="text-[48px] font-extralight text-white font-heading">${price}</span>
+        <span className="text-[32px] md:text-[48px] font-extralight text-white font-heading">${price}</span>
         <span className="text-[14px] text-white/70 font-body">p/month</span>
       </div>
       <div className="w-full mb-5 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.09)_20%,rgba(255,255,255,0.22)_50%,rgba(255,255,255,0.09)_80%,transparent)]"></div>
@@ -199,14 +199,14 @@ export const GlassyPricingSection = ({
       {showAnimatedBackground && <ShaderCanvas />}
       <div className="relative z-10 w-full flex flex-col items-center justify-center px-4 py-16 md:py-20 lg:py-24">
         <div className="w-full max-w-5xl mx-auto text-center mb-14">
-          <h2 className="text-[48px] md:text-[64px] font-extralight leading-tight tracking-[-0.03em] bg-clip-text text-transparent bg-gradient-to-r from-white via-accent-green to-accent-teal font-heading">
+          <h2 className="text-[28px] sm:text-[40px] md:text-[64px] font-extralight leading-tight tracking-[-0.03em] bg-clip-text text-transparent bg-gradient-to-r from-white via-accent-green to-accent-teal font-heading">
             {title}
           </h2>
           <p className="mt-3 text-[16px] md:text-[20px] text-white/80 max-w-2xl mx-auto font-body">
             {subtitle}
           </p>
         </div>
-        <div className="flex flex-col md:flex-row gap-8 md:gap-6 justify-center items-center w-full max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl px-2 md:px-0">
           {plans.map((plan) => <GlassyPricingCard key={plan.planName} {...plan} />)}
         </div>
       </div>

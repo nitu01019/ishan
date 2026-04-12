@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Play, Volume2, Lock, X } from "lucide-react";
 import { formatDuration } from "@/lib/format-duration";
+import { useIsMobile } from "@/lib/hooks";
 import type { Video } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -48,6 +49,7 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
   const [isPreloading, setIsPreloading] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile(768);
 
   const isPortrait = variant === "portrait";
   const hasThumbnail = video.thumbnailUrl.length > 0;
@@ -55,10 +57,11 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
   const youtubeId = isYouTube ? extractYouTubeId(video.videoUrl) : null;
 
   // -----------------------------------------------------------------------
-  // Task 3: Warm DNS + TCP for direct video files when card enters viewport
+  // Warm DNS + TCP for direct video files when card enters viewport
+  // Skip on mobile to save bandwidth — only preload when user taps play
   // -----------------------------------------------------------------------
   useEffect(() => {
-    if (isYouTube) return;
+    if (isYouTube || isMobile) return;
 
     const videoUrl = video.videoUrl;
     if (!videoUrl || preloadedHeadUrls.has(videoUrl)) return;
@@ -82,13 +85,14 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [isYouTube, video.videoUrl]);
+  }, [isYouTube, isMobile, video.videoUrl]);
 
   // -----------------------------------------------------------------------
-  // Task 3 (hover): Preload first 500 KB of direct video on hover
+  // Preload first 500 KB of direct video on hover (desktop only)
+  // Skip on mobile to save bandwidth
   // -----------------------------------------------------------------------
   const preloadVideoRange = useCallback(() => {
-    if (isYouTube) return;
+    if (isYouTube || isMobile) return;
 
     const videoUrl = video.videoUrl;
     if (!videoUrl || preloadedRangeUrls.has(videoUrl)) return;
@@ -101,19 +105,22 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
     }).catch(() => {
       // Best-effort — silently ignore failures
     });
-  }, [isYouTube, video.videoUrl]);
+  }, [isYouTube, isMobile, video.videoUrl]);
 
   // -----------------------------------------------------------------------
-  // Task 2: Predictive preload for YouTube — hidden iframe on hover
+  // Predictive preload for YouTube — hidden iframe on hover (desktop only)
+  // On mobile, skip preloading entirely to save bandwidth
   // -----------------------------------------------------------------------
   const handlePointerEnter = useCallback(() => {
+    if (isMobile) return;
+
     if (isYouTube && youtubeId && !isPlaying) {
       setIsPreloading(true);
     }
     if (!isYouTube) {
       preloadVideoRange();
     }
-  }, [isYouTube, youtubeId, isPlaying, preloadVideoRange]);
+  }, [isMobile, isYouTube, youtubeId, isPlaying, preloadVideoRange]);
 
   const handleClick = () => {
     if (isYouTube && youtubeId) {
@@ -156,12 +163,13 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
         tabIndex={isPlaying ? undefined : 0}
         aria-label={isPlaying ? undefined : `Play video: ${video.title}`}
       >
-        {/* ---- HIDDEN YOUTUBE PRELOAD IFRAME ---- */}
-        {isPreloading && !isPlaying && youtubeId && (
+        {/* ---- HIDDEN YOUTUBE PRELOAD IFRAME (desktop only) ---- */}
+        {isPreloading && !isPlaying && !isMobile && youtubeId && (
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1`}
             className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
             allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            loading="lazy"
             tabIndex={-1}
             aria-hidden="true"
             title={`Preloading ${video.title}`}
@@ -176,6 +184,7 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
               className="absolute inset-0 w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              loading="lazy"
               title={video.title}
             />
             {/* Close / stop button */}
@@ -246,10 +255,10 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
               </div>
             )}
 
-            {/* Play button overlay */}
+            {/* Play button overlay — min 44x44 touch target */}
             <div className="absolute inset-0 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-              <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110">
-                <Play className="w-6 h-6 text-white fill-white ml-1" />
+              <div className="w-12 h-12 md:w-14 md:h-14 min-w-[44px] min-h-[44px] rounded-full bg-red-600 flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110">
+                <Play className="w-5 h-5 md:w-6 md:h-6 text-white fill-white ml-0.5" />
               </div>
             </div>
 

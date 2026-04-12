@@ -23,9 +23,9 @@ interface TestimonialsProps {
 
 function TestimonialCard({ testimonial }: { readonly testimonial: Testimonial }) {
   return (
-    <div className="flex flex-col items-center space-y-4 text-center rounded-2xl border border-white/10 bg-[#111827]/90 p-5 backdrop-blur-md">
+    <div className="flex flex-col items-center space-y-4 text-center rounded-2xl border border-white/10 bg-[#111827]/90 p-4 md:p-5 backdrop-blur-md">
       <ReviewStars className="text-accent-green" rating={testimonial.rating} />
-      <div className="text-base text-white/90">
+      <div className="text-sm md:text-base text-white/90 leading-relaxed" style={{ fontSize: "max(14px, 0.875rem)" }}>
         <blockquote>&ldquo;{testimonial.quote}&rdquo;</blockquote>
       </div>
       <div className="flex items-center gap-3 pt-2">
@@ -101,15 +101,15 @@ function CarouselLayout({ testimonials, background, animations }: Omit<Testimoni
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4">
-        <div className="flex gap-6 w-max px-4">
+      <div className="max-w-7xl mx-auto overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="flex gap-4 md:gap-6 w-max px-4">
           {testimonials.map((testimonial) => (
             <motion.div
               key={testimonial.id}
               initial={item.hidden}
               whileInView={item.visible}
               viewport={{ once: true }}
-              className="snap-center w-[320px] md:w-[380px] flex-shrink-0"
+              className="snap-center w-[calc(100vw-3rem)] max-w-[320px] md:max-w-[380px] md:w-[380px] flex-shrink-0"
             >
               <TestimonialCard testimonial={testimonial} />
             </motion.div>

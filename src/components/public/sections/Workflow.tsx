@@ -91,11 +91,11 @@ function MobileWorkflow({ background, animations }: WorkflowProps) {
         </p>
       </div>
 
-      <div className="max-w-md mx-auto relative">
+      <div className="max-w-md mx-auto relative px-2">
         {/* Vertical line */}
-        <div className="absolute left-5 top-0 bottom-0 w-px bg-white/10" />
+        <div className="absolute left-[1.625rem] top-0 bottom-0 w-px bg-white/10" />
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
           {workflowData.map((step) => {
             const Icon = step.icon;
             return (
@@ -104,24 +104,24 @@ function MobileWorkflow({ background, animations }: WorkflowProps) {
                 initial={item.hidden}
                 whileInView={item.visible}
                 viewport={{ once: true }}
-                className="flex gap-4 items-start"
+                className="flex gap-3 sm:gap-4 items-start"
               >
-                {/* Circle icon */}
+                {/* Circle icon -- 44px min tap target */}
                 <div
-                  className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 ${statusColors[step.status]}`}
+                  className={`flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center border-2 z-10 ${statusColors[step.status]}`}
                 >
-                  <Icon size={16} />
+                  <Icon size={18} />
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 bg-[#111827]/80 border border-white/10 rounded-xl p-4">
+                <div className="flex-1 bg-[#111827]/80 border border-white/10 rounded-xl p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-sm font-bold text-white">{step.title}</h3>
+                    <h3 className="text-sm sm:text-base font-bold text-white">{step.title}</h3>
                     <span className="text-xs text-white/40 font-mono">{step.date}</span>
                   </div>
-                  <p className="text-xs text-white/70 leading-relaxed">{step.content}</p>
+                  <p className="text-sm text-white/70 leading-relaxed">{step.content}</p>
                   {/* Energy bar */}
-                  <div className="mt-3 w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div className="mt-3 w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-accent-green to-accent-cyan"
                       style={{ width: `${step.energy}%` }}

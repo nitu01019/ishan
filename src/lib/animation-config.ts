@@ -1,6 +1,36 @@
 import type { AnimationConfig } from "@/types";
 
-export function getCardVariants(config?: AnimationConfig) {
+// ---------------------------------------------------------------------------
+// Simple fade variant used on mobile to avoid layout shifts and jank from
+// Y-translation, scale, or flip transforms.
+// ---------------------------------------------------------------------------
+
+const MOBILE_CONTAINER = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.04 } },
+};
+
+const MOBILE_ITEM = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+};
+
+/**
+ * Returns Framer Motion variants for card entrance animations.
+ *
+ * When `isMobile` is true the function returns a lightweight fade-only
+ * variant regardless of the configured entrance style. This avoids Y
+ * translations, scale transforms, and 3-D flips that cause layout shifts
+ * and jank on lower-powered mobile devices.
+ */
+export function getCardVariants(config?: AnimationConfig, isMobile = false) {
+  if (isMobile) {
+    return { container: MOBILE_CONTAINER, item: MOBILE_ITEM };
+  }
+
   const entrance = config?.cardEntrance ?? "fade-up";
 
   const container = {

@@ -10,6 +10,7 @@ import VideoCard from "@/components/ui/VideoCard";
 import { formatDuration } from "@/lib/format-duration";
 import { getSectionStyle } from "@/lib/section-style";
 import { getCardVariants } from "@/lib/animation-config";
+import { useIsMobile } from "@/lib/hooks";
 import type { Video, SectionBackground, AnimationConfig } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -58,6 +59,7 @@ function VideoSlide({ video, index, playingId, onPlay, onStop }: VideoSlideProps
             className="absolute inset-0 w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
+            loading="lazy"
             title={video.title}
           />
           <button
@@ -107,10 +109,10 @@ function VideoSlide({ video, index, playingId, onPlay, onStop }: VideoSlideProps
             </div>
           )}
 
-          {/* Play button */}
+          {/* Play button — min 44x44 for touch targets */}
           <div className="absolute inset-0 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-            <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-xl">
-              <Play className="w-7 h-7 text-white fill-white ml-1" />
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-red-600 flex items-center justify-center shadow-xl">
+              <Play className="w-6 h-6 md:w-7 md:h-7 text-white fill-white ml-0.5" />
             </div>
           </div>
 
@@ -141,7 +143,8 @@ interface RecentEditsProps {
 // ---------------------------------------------------------------------------
 
 function GridLayout({ videos, background, animations }: Omit<RecentEditsProps, 'layout'>) {
-  const { container, item } = getCardVariants(animations);
+  const isMobile = useIsMobile(768);
+  const { container, item } = getCardVariants(animations, isMobile);
   const [playingId, setPlayingId] = useState<string | null>(null);
 
   return (
@@ -162,7 +165,7 @@ function GridLayout({ videos, background, animations }: Omit<RecentEditsProps, '
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
-        className="mt-12 max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="mt-12 max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
       >
         {videos.map((video, index) => (
           <motion.div key={video.id} variants={item}>
@@ -185,7 +188,8 @@ function GridLayout({ videos, background, animations }: Omit<RecentEditsProps, '
 // ---------------------------------------------------------------------------
 
 function FeaturedLayout({ videos, background, animations }: Omit<RecentEditsProps, 'layout'>) {
-  const { container, item } = getCardVariants(animations);
+  const isMobile = useIsMobile(768);
+  const { container, item } = getCardVariants(animations, isMobile);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const featuredVideo = videos[0];
   const restVideos = videos.slice(1);
@@ -254,7 +258,8 @@ function FeaturedLayout({ videos, background, animations }: Omit<RecentEditsProp
 // ---------------------------------------------------------------------------
 
 function CarouselLayout({ videos, background, animations }: Omit<RecentEditsProps, 'layout'>) {
-  const { item } = getCardVariants(animations);
+  const isMobile = useIsMobile(768);
+  const { item } = getCardVariants(animations, isMobile);
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: "center" },
@@ -283,7 +288,7 @@ function CarouselLayout({ videos, background, animations }: Omit<RecentEditsProp
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex gap-6">
             {videos.map((video, index) => (
-              <div key={video.id} className="flex-[0_0_85%] md:flex-[0_0_70%] min-w-0">
+              <div key={video.id} className="flex-[0_0_92%] md:flex-[0_0_70%] min-w-0">
                 <VideoSlide
                   video={video}
                   index={index}

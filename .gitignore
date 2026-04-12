@@ -8,3 +8,6 @@ node_modules/
 next-env.d.ts
 .firebase/
 firebase-debug.log
+
+# Local Netlify folder
+.netlify

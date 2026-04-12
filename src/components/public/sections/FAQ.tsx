@@ -25,22 +25,22 @@ function AccordionItem({ faq, isOpen, onToggle }: AccordionItemProps) {
   const answerId = `faq-answer-${faq.id}`;
 
   return (
-    <div className="border border-gray-700 rounded-xl p-4">
+    <div className="border border-gray-700 rounded-xl p-3 md:p-4">
       <button
         type="button"
         id={questionId}
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={answerId}
-        className="w-full flex items-center justify-between gap-4 text-left"
+        className="w-full flex items-center justify-between gap-3 md:gap-4 text-left min-h-[44px]"
       >
-        <span className="text-white font-medium text-sm md:text-base">
+        <span className="text-white font-medium text-sm md:text-base break-words">
           {faq.question}
         </span>
         <motion.span
           animate={{ rotate: isOpen ? 45 : 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="flex-shrink-0 text-accent-green text-xl font-light leading-none"
+          className="flex-shrink-0 text-accent-green text-xl font-light leading-none w-6 h-6 flex items-center justify-center"
           aria-hidden="true"
         >
           +
@@ -59,7 +59,7 @@ function AccordionItem({ faq, isOpen, onToggle }: AccordionItemProps) {
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <p className="pt-3 text-text-secondary text-sm leading-relaxed">
+            <p className="pt-3 text-text-secondary text-sm leading-relaxed break-words overflow-wrap-anywhere">
               {faq.answer}
             </p>
           </motion.div>

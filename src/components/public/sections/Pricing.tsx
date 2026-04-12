@@ -87,7 +87,7 @@ function ComparisonLayout({ plans, background }: Omit<PricingProps, 'layout'>) {
         </p>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
         <table className="w-full border-collapse min-w-[600px]">
           <thead>
             <tr>
@@ -224,7 +224,7 @@ function StackedLayout({ plans, background, animations }: Omit<PricingProps, 'la
               <div className="md:min-w-[140px] md:text-right">
                 <a
                   href="#contact"
-                  className={`inline-block px-6 py-2.5 rounded-xl font-semibold text-sm transition ${
+                  className={`block md:inline-block w-full md:w-auto text-center px-6 py-3 md:py-2.5 rounded-xl font-semibold text-sm transition min-h-[44px] ${
                     plan.isHighlighted
                       ? "bg-accent-green text-black hover:brightness-110"
                       : "bg-white/10 text-white border border-white/20 hover:bg-white/20"

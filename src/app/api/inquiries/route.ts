@@ -3,6 +3,8 @@ import { isAuthenticated } from "@/lib/auth";
 import { getInquiries, createInquiry } from "@/lib/db";
 import type { ApiResponse, Inquiry } from "@/types";
 
+export const runtime = 'nodejs';
+
 export async function GET(): Promise<NextResponse<ApiResponse<Inquiry[]>>> {
   try {
     const authenticated = await isAuthenticated();

@@ -5,6 +5,8 @@ import { getVideos, createItem } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
 import type { ApiResponse, Video } from "@/types";
 
+export const runtime = 'nodejs';
+
 export async function GET(request: Request): Promise<NextResponse<ApiResponse<Video[]>>> {
   try {
     const { searchParams } = new URL(request.url);

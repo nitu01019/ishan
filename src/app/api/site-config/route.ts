@@ -6,6 +6,7 @@ import { isAuthenticated } from "@/lib/auth";
 import type { ApiResponse, SiteConfig } from "@/types";
 
 export const dynamic = "force-dynamic";
+export const runtime = 'nodejs';
 
 export async function GET(): Promise<NextResponse<ApiResponse<SiteConfig>>> {
   try {

@@ -5,6 +5,8 @@ import { getTestimonials, createItem } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
 import type { ApiResponse, Testimonial } from "@/types";
 
+export const runtime = 'nodejs';
+
 export async function GET(): Promise<NextResponse<ApiResponse<Testimonial[]>>> {
   try {
     const includeHidden = await isAuthenticated();

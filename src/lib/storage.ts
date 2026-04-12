@@ -2,7 +2,7 @@ import { supabase, isSupabaseConfigured } from "./supabase";
 
 export async function uploadFile(file: File): Promise<string> {
   if (!isSupabaseConfigured || !supabase) {
-    return "";
+    throw new Error("Storage not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.");
   }
 
   const timestamp = Date.now();

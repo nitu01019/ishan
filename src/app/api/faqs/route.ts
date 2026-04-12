@@ -5,6 +5,8 @@ import { getFAQs, createItem } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
 import type { ApiResponse, FAQ } from "@/types";
 
+export const runtime = 'nodejs';
+
 export async function GET(): Promise<NextResponse<ApiResponse<FAQ[]>>> {
   try {
     const includeHidden = await isAuthenticated();

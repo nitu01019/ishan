@@ -16,6 +16,7 @@ import type { ApiResponse } from "@/types";
 
 // Allow up to 60s for slow uploads on serverless (App Router segment config).
 export const maxDuration = 60;
+export const runtime = 'nodejs';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB (server route for small files only)
 

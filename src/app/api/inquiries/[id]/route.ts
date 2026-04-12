@@ -4,6 +4,8 @@ import { isAuthenticated } from "@/lib/auth";
 import { updateItem, deleteItem } from "@/lib/db";
 import type { ApiResponse } from "@/types";
 
+export const runtime = 'nodejs';
+
 interface RouteContext {
   params: Promise<{ id: string }>;
 }

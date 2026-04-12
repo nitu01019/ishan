@@ -5,6 +5,8 @@ import { getPricing, createItem } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
 import type { ApiResponse, PricingPlan } from "@/types";
 
+export const runtime = 'nodejs';
+
 export async function GET(): Promise<NextResponse<ApiResponse<PricingPlan[]>>> {
   try {
     const includeHidden = await isAuthenticated();

@@ -52,7 +52,7 @@ export async function createSession(): Promise<void> {
     secure: process.env.NODE_ENV === "production",
     maxAge: SESSION_MAX_AGE,
     path: "/",
-    sameSite: "strict",
+    sameSite: "lax",
   });
 }
 

@@ -229,7 +229,9 @@ function deepMerge(
 export async function updateSiteConfig(
   updates: Record<string, unknown>
 ): Promise<void> {
-  if (!isSupabaseConfigured || !supabase) return;
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Database not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.");
+  }
 
   const current = await getSiteConfig();
   const merged = deepMerge(
@@ -249,7 +251,7 @@ export async function createItem(
   data: Record<string, unknown>
 ): Promise<string> {
   if (!isSupabaseConfigured || !supabase) {
-    return "";
+    throw new Error("Database not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.");
   }
 
   const id =
@@ -270,7 +272,7 @@ export async function updateItem(
   data: Record<string, unknown>
 ): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
-    return;
+    throw new Error("Database not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.");
   }
 
   const { error } = await supabase
@@ -286,7 +288,7 @@ export async function deleteItem(
   id: string
 ): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
-    return;
+    throw new Error("Database not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.");
   }
 
   const { error } = await supabase
@@ -323,13 +325,13 @@ export async function createInquiry(data: Omit<Inquiry, "id" | "createdAt" | "is
     isRead: false,
   };
 
-  if (isSupabaseConfigured && supabase) {
-    const { error } = await supabase
-      .from("inquiries")
-      .insert(inquiry);
-    if (error) throw error;
-    return id;
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Database not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.");
   }
 
+  const { error } = await supabase
+    .from("inquiries")
+    .insert(inquiry);
+  if (error) throw error;
   return id;
 }

@@ -335,7 +335,7 @@ export async function uploadFile(
   // ---- Server fallback (small files only) ----
   if (file.size > SERVER_UPLOAD_LIMIT) {
     throw new Error(
-      'Large file uploads require Supabase Storage. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local',
+      'Storage not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.',
     );
   }
   return uploadViaServer(file, options);

@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { validatePassword, createSession } from "@/lib/auth";
 import type { ApiResponse } from "@/types";
 
+export const runtime = 'nodejs';
+
 export async function POST(request: Request): Promise<NextResponse<ApiResponse<null>>> {
   try {
     const body = await request.json() as { password?: string };

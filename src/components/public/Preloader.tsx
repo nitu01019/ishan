@@ -2,13 +2,19 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SparklesText } from "@/components/ui/sparkles-text";
-import { Progress } from "@/components/ui/progress";
 
 const MIN_DISPLAY_TIME = 2000;
 const HARD_TIMEOUT = 4000; // Force-hide after 4s no matter what
 
-export default function Preloader() {
+interface PreloaderProps {
+  portfolioName?: string;
+  loadingMessage?: string;
+}
+
+export default function Preloader({
+  portfolioName = "Neil's Portfolio",
+  loadingMessage = "Loading...",
+}: PreloaderProps) {
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [show, setShow] = useState(true);
@@ -66,37 +72,27 @@ export default function Preloader() {
       {show && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.02 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0B1120]"
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black"
         >
-          {/* Subtle gradient background */}
-          <div className="absolute inset-0 opacity-30">
+          {/* Portfolio name */}
+          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight text-center px-4">
+            {portfolioName}
+          </h1>
+
+          {/* Loading bar — thin, white, animated */}
+          <div className="mt-6 w-48 h-0.5 bg-white/20 rounded-full overflow-hidden">
             <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "radial-gradient(ellipse at 50% 50%, rgba(0,230,118,0.08) 0%, transparent 60%)",
-              }}
+              className="h-full bg-white rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
             />
           </div>
 
-          <div className="relative z-10 flex flex-col items-center gap-8 px-4">
-            {/* Sparkles heading */}
-            <SparklesText
-              text="Getting Ishan's portfolio for you"
-              className="text-2xl md:text-4xl lg:text-5xl font-heading font-bold text-white text-center"
-              sparklesCount={15}
-            />
-
-            {/* Progress bar */}
-            <div className="w-64 md:w-80">
-              <Progress value={progress} />
-              <p className="text-center text-text-secondary text-sm mt-3 font-mono">
-                {Math.round(progress)}%
-              </p>
-            </div>
-          </div>
+          {/* Loading message */}
+          <p className="mt-3 text-sm text-white/50">
+            {loadingMessage}
+          </p>
         </motion.div>
       )}
     </AnimatePresence>

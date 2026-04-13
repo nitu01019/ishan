@@ -37,6 +37,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [authenticated, setAuthenticated] = useState(false);
   const [checking, setChecking] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [portfolioName, setPortfolioName] = useState("Neil's Portfolio");
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
@@ -62,7 +63,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       }
     }
 
+    async function fetchPortfolioName() {
+      try {
+        const res = await fetch('/api/site-config');
+        const json = await res.json();
+        const config = json.data;
+        if (config) {
+          const name =
+            config.brandName ||
+            config.navbar?.logoText ||
+            config.footer?.name ||
+            "Neil's Portfolio";
+          setPortfolioName(name);
+        }
+      } catch {
+        // Keep default on error
+      }
+    }
+
     checkAuth();
+    fetchPortfolioName();
   }, [router]);
 
   async function handleLogout() {
@@ -87,7 +107,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const sidebarContent = (
     <>
-      <h2 className="text-xl font-bold text-white mb-4">Dashboard</h2>
+      <div className="mb-4">
+        <p className="text-xs text-text-secondary uppercase tracking-wider mb-1">{portfolioName}</p>
+        <h2 className="text-xl font-bold text-white">Dashboard</h2>
+      </div>
 
       <a
         href="/"
@@ -142,7 +165,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         >
           <Menu size={24} />
         </button>
-        <span className="ml-3 text-white font-bold text-lg">Dashboard</span>
+        <span className="ml-3 text-white font-bold text-lg">{portfolioName}</span>
         <button
           onClick={handleRefresh}
           className="ml-auto text-text-secondary hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
@@ -168,7 +191,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }`}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Dashboard</h2>
+          <div>
+            <p className="text-xs text-text-secondary uppercase tracking-wider mb-1">{portfolioName}</p>
+            <h2 className="text-xl font-bold text-white">Dashboard</h2>
+          </div>
           <button
             onClick={closeSidebar}
             className="text-white p-1"

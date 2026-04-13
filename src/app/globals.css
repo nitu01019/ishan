@@ -161,6 +161,11 @@ body {
   to { background-position: 0% -1000%; }
 }
 
+/* Hide scrollbar on horizontal scroll carousels (webkit) */
+.snap-x::-webkit-scrollbar {
+  display: none;
+}
+
 /* Focus visible for keyboard users */
 *:focus-visible {
   outline: 2px solid rgb(var(--accent-green-rgb));

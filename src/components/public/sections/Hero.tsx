@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -9,9 +10,19 @@ import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import { getSectionStyle } from "@/lib/section-style";
 import type { SectionBackground } from "@/types";
 
-// Lazy-load Spline only when actually needed (desktop only)
-const SplineScene = lazy(() =>
-  import("@/components/ui/splite").then((mod) => ({ default: mod.SplineScene }))
+function SplineLoadingPlaceholder() {
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-black/50">
+      <div className="w-24 h-24 rounded-full bg-accent-green/20 animate-pulse" />
+    </div>
+  );
+}
+
+// Use next/dynamic with ssr:false so the import starts immediately on hydration,
+// not after a useEffect sets isDesktop=true (eliminates ~2s delay).
+const SplineScene = dynamic(
+  () => import("@/components/ui/splite").then((mod) => ({ default: mod.SplineScene })),
+  { ssr: false, loading: () => <SplineLoadingPlaceholder /> }
 );
 
 const container = {
@@ -49,15 +60,6 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
   const words = rotatingWords?.length ? rotatingWords : DEFAULT_WORDS;
   const shouldShowSpline = showSpline !== false;
   const [wordIndex, setWordIndex] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    setIsDesktop(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -180,15 +182,13 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
             </motion.div>
           </motion.div>
 
-          {/* Right: 3D Spline scene -- only imported and rendered on desktop */}
-          {isDesktop && shouldShowSpline && (
-            <div className="flex-1 relative">
-              <Suspense fallback={<div className="w-full h-full" />}>
-                <SplineScene
-                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                  className="w-full h-full"
-                />
-              </Suspense>
+          {/* Right: 3D Spline scene -- CSS hidden on mobile, visible on lg+ */}
+          {shouldShowSpline && (
+            <div className="hidden lg:block flex-1 relative">
+              <SplineScene
+                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                className="w-full h-full"
+              />
             </div>
           )}
         </div>

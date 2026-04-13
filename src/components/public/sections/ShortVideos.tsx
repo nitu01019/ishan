@@ -38,21 +38,21 @@ function GridLayout({ videos, background, animations }: Omit<ShortVideosProps, '
         variants={container}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        className="mt-12 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 px-4 md:px-0 max-w-7xl mx-auto"
+        viewport={{ once: true, amount: 0.1 }}
+        className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-6 px-4 md:px-0 max-w-7xl mx-auto"
       >
         {visibleVideos.map((video, i) => (
-          <motion.div key={video.id} variants={item}>
+          <motion.div key={video.id} variants={item} className="min-h-[420px] sm:min-h-0">
             <VideoCard video={video} variant="portrait" showSound={i === 1} />
           </motion.div>
         ))}
       </motion.div>
 
       {hasMore && (
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-8 px-4 md:px-0">
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
           >
             {showAll ? (
               <>Show Less <ChevronUp className="w-4 h-4" /></>
@@ -101,11 +101,11 @@ function FeaturedLayout({ videos, background, animations }: Omit<ShortVideosProp
             variants={container}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
+            viewport={{ once: true, amount: 0.1 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-4"
           >
             {restVideos.map((video, i) => (
-              <motion.div key={video.id} variants={item}>
+              <motion.div key={video.id} variants={item} className="min-h-[420px] sm:min-h-0">
                 <VideoCard video={video} variant="portrait" showSound={i === 0} />
               </motion.div>
             ))}
@@ -114,10 +114,10 @@ function FeaturedLayout({ videos, background, animations }: Omit<ShortVideosProp
       </div>
 
       {hasMore && (
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-8 px-4 md:px-0">
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
           >
             {showAll ? (
               <>Show Less <ChevronUp className="w-4 h-4" /></>
@@ -150,18 +150,19 @@ function CarouselLayout({ videos, background, animations }: Omit<ShortVideosProp
         variants={container}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.1 }}
         className={`mt-12 flex gap-4 md:gap-6 px-4 md:px-0 max-w-7xl mx-auto ${
           showAll
             ? "flex-wrap justify-center"
-            : "overflow-x-auto md:overflow-visible md:justify-center snap-x snap-mandatory scrollbar-hide pb-2"
+            : "overflow-x-auto md:overflow-visible md:justify-center pb-4"
         }`}
+        style={showAll ? undefined : { scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
       >
         {visibleVideos.map((video, i) => (
           <motion.div
             key={video.id}
             variants={item}
-            className={`flex-shrink-0 w-[78vw] sm:w-[280px] md:w-[300px] ${showAll ? "w-[45vw] sm:w-[280px]" : "snap-center"}`}
+            className="flex-shrink-0 w-[85vw] max-w-[320px] sm:w-[280px] md:w-[300px]"
           >
             <VideoCard video={video} variant="portrait" showSound={i === 1} />
           </motion.div>
@@ -169,10 +170,10 @@ function CarouselLayout({ videos, background, animations }: Omit<ShortVideosProp
       </motion.div>
 
       {hasMore && (
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-8 px-4 md:px-0">
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
           >
             {showAll ? (
               <>Show Less <ChevronUp className="w-4 h-4" /></>

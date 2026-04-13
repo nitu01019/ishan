@@ -50,7 +50,7 @@ const EMPTY_FORM: VideoFormData = {
   category: 'recent',
   platform: 'youtube',
   duration: '',
-  creatorName: 'Ishan',
+  creatorName: 'Neil',
   viewCount: '0',
   videoUrl: '',
   thumbnailUrl: '',
@@ -932,7 +932,7 @@ export default function VideosPage() {
                   value={form.creatorName}
                   onChange={(e) => updateField('creatorName', e.target.value)}
                   className={inputClass()}
-                  placeholder="Ishan"
+                  placeholder="Neil"
                   required
                 />
               </div>

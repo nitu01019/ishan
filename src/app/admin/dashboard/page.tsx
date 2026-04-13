@@ -199,6 +199,7 @@ function DatabaseStatusBadge({
 
 export default function DashboardPage() {
   const [state, setState] = useState<DashboardState>(INITIAL_STATE);
+  const [portfolioName, setPortfolioName] = useState("Neil");
 
   useEffect(() => {
     async function loadStats() {
@@ -228,7 +229,26 @@ export default function DashboardPage() {
       });
     }
 
+    async function fetchPortfolioName() {
+      try {
+        const res = await fetch('/api/site-config');
+        const json = await res.json();
+        const config = json.data;
+        if (config) {
+          const name =
+            config.brandName ||
+            config.navbar?.logoText ||
+            config.footer?.name ||
+            "Neil";
+          setPortfolioName(name);
+        }
+      } catch {
+        // Keep default on error
+      }
+    }
+
     loadStats();
+    fetchPortfolioName();
   }, []);
 
   const statCards: readonly StatCard[] = [
@@ -260,7 +280,7 @@ export default function DashboardPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">Dashboard Overview</h1>
         <p className="text-text-secondary text-sm mt-1">
-          Welcome back. Here is a summary of your portfolio.
+          Welcome back, {portfolioName}. Here is a summary of your portfolio.
         </p>
       </div>
 

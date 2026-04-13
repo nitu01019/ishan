@@ -156,7 +156,7 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
         className={`relative overflow-hidden rounded-2xl border border-border-glow
           transition-all duration-200
           ${isPlaying ? "" : "hover:border-border-glow-hover hover:-translate-y-1 hover:shadow-green cursor-pointer"}
-          ${isPortrait ? "aspect-[9/16]" : "aspect-video"}`}
+          ${isPortrait ? "aspect-[9/16] min-h-[420px] sm:min-h-[400px]" : "aspect-video min-h-[180px] sm:min-h-[220px]"}`}
         onClick={isPlaying ? undefined : handleClick}
         onKeyDown={isPlaying ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
         role={isPlaying ? undefined : "button"}
@@ -250,15 +250,15 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
 
             {/* Duration badge */}
             {video.duration && (
-              <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded z-10">
+              <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs sm:text-sm font-medium px-1.5 py-0.5 rounded z-10 min-w-[40px] text-center" style={{ fontSize: 'max(12px, 0.75rem)' }}>
                 {formatDuration(video.duration)}
               </div>
             )}
 
-            {/* Play button overlay — min 44x44 touch target */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-              <div className="w-12 h-12 md:w-14 md:h-14 min-w-[44px] min-h-[44px] rounded-full bg-red-600 flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110">
-                <Play className="w-5 h-5 md:w-6 md:h-6 text-white fill-white ml-0.5" />
+            {/* Play button overlay — min 48x48 touch target on mobile */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 min-w-[48px] min-h-[48px] rounded-full bg-red-600/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-black/30 transition-transform duration-200 group-hover:scale-110">
+                <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white ml-0.5" />
               </div>
             </div>
 
@@ -271,8 +271,8 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
 
             {/* Title overlay for landscape */}
             {!isPortrait && video.title && video.title !== "Your Video Title" && (
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                <p className="text-sm font-medium text-white truncate">{video.title}</p>
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/80 to-transparent">
+                <p className="font-medium text-white line-clamp-2 sm:truncate" style={{ fontSize: 'max(12px, 0.875rem)' }}>{video.title}</p>
               </div>
             )}
           </>

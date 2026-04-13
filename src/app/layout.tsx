@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { Playfair_Display, Inter } from "next/font/google";
 import ThemeProvider from "@/components/public/ThemeProvider";
 import StuckDetector from "@/components/ui/StuckDetector";
+import { getSiteConfig } from "@/lib/db";
 import "./globals.css";
 
 const Preloader = dynamic(() => import("@/components/public/Preloader"), {
@@ -85,14 +86,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const siteConfig = await getSiteConfig();
+  const preloaderPortfolioName =
+    siteConfig.preloader?.portfolioName ||
+    siteConfig.navbar?.logoText ||
+    "Neil's Portfolio";
+  const preloaderLoadingMessage =
+    siteConfig.preloader?.loadingMessage || "Loading...";
+
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
+        <link rel="preconnect" href="https://prod.spline.design" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://prod.spline.design" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -115,6 +126,50 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className="font-body antialiased">
+        {/* Mobile desktop recommendation banner — auto-fades after ~8s, once per session */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes desktopBannerFade {
+            0%, 80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(100%); pointer-events: none; }
+          }
+          #desktop-banner.dismissed { display: none; }
+        `}} />
+        <div
+          className="lg:hidden fixed bottom-4 left-4 right-4 z-50 pointer-events-none"
+          id="desktop-banner"
+          style={{ animation: 'desktopBannerFade 10s ease-in-out forwards' }}
+        >
+          <div className="bg-black/80 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between pointer-events-auto">
+            <p className="text-white/70 text-xs">
+              <span className="text-white font-medium">Best viewed on desktop</span>
+              {" "}&middot; For the full experience, open on a PC
+            </p>
+            <button
+              id="desktop-banner-dismiss"
+              className="text-white/40 hover:text-white text-lg ml-3 leading-none flex-shrink-0"
+              aria-label="Dismiss banner"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function(){
+            var b=document.getElementById('desktop-banner');
+            if(!b)return;
+            try{if(sessionStorage.getItem('desktop-banner-dismissed')){b.classList.add('dismissed');return;}}catch(e){}
+            var btn=document.getElementById('desktop-banner-dismiss');
+            if(btn)btn.addEventListener('click',function(){
+              b.classList.add('dismissed');
+              try{sessionStorage.setItem('desktop-banner-dismissed','1');}catch(e){}
+            });
+            b.addEventListener('animationend',function(){
+              b.classList.add('dismissed');
+              try{sessionStorage.setItem('desktop-banner-dismissed','1');}catch(e){}
+            });
+          })();
+        `}} />
+
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[10000] focus:px-4 focus:py-2 focus:bg-[#00E676] focus:text-black focus:rounded-lg focus:font-semibold focus:outline-none"
@@ -366,25 +421,57 @@ export default function RootLayout({
               inset: 0,
               zIndex: 9999,
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: "#0B1120",
+              backgroundColor: "#000000",
             }}
           >
             <p
               style={{
-                fontFamily: "var(--font-heading), serif",
-                fontSize: "clamp(1.25rem, 4vw, 2.5rem)",
+                fontSize: "clamp(1.5rem, 4vw, 2.25rem)",
                 fontWeight: 700,
                 color: "#ffffff",
                 textAlign: "center",
                 padding: "0 1rem",
+                letterSpacing: "-0.025em",
               }}
             >
-              Getting Ishan&apos;s portfolio for you
+              {preloaderPortfolioName}
+            </p>
+            <div
+              style={{
+                marginTop: "1.5rem",
+                width: "12rem",
+                height: "2px",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                borderRadius: "9999px",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: "30%",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "9999px",
+                }}
+              />
+            </div>
+            <p
+              style={{
+                marginTop: "0.75rem",
+                fontSize: "0.875rem",
+                color: "rgba(255,255,255,0.5)",
+              }}
+            >
+              {preloaderLoadingMessage}
             </p>
           </div>
-          <Preloader />
+          <Preloader
+            portfolioName={preloaderPortfolioName}
+            loadingMessage={preloaderLoadingMessage}
+          />
           {children}
           <StuckDetector />
         </ThemeProvider>

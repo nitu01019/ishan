@@ -5,6 +5,7 @@ import ToggleSwitch from '@/components/admin/ToggleSwitch';
 import { defaultHeroConfig } from '@/lib/visual-config-defaults';
 
 interface FormState {
+  brandName: string;
   heroHeadline: string;
   heroSubtitle: string;
   heroCta: string;
@@ -23,6 +24,7 @@ interface FormState {
 }
 
 const EMPTY_FORM: FormState = {
+  brandName: '',
   heroHeadline: '',
   heroSubtitle: '',
   heroCta: '',
@@ -58,6 +60,7 @@ export default function SettingsPage() {
         const config = data.data ?? {};
 
         setForm({
+          brandName: config.brandName ?? config.navbar?.logoText ?? config.footer?.name ?? '',
           heroHeadline: config.hero?.headline ?? '',
           heroSubtitle: config.hero?.subtitle ?? '',
           heroCta: config.hero?.ctaText ?? '',
@@ -94,7 +97,10 @@ export default function SettingsPage() {
     setError('');
     setSuccess('');
 
-    const payload = {
+    const effectiveBrandName = form.brandName.trim();
+
+    const payload: Record<string, unknown> = {
+      brandName: effectiveBrandName || undefined,
       hero: {
         headline: form.heroHeadline,
         subtitle: form.heroSubtitle,
@@ -123,6 +129,11 @@ export default function SettingsPage() {
       },
       bookingLink: form.bookingLink,
     };
+
+    // Sync brand name to navbar logoText so it propagates site-wide
+    if (effectiveBrandName) {
+      payload.navbar = { logoText: effectiveBrandName };
+    }
 
     try {
       const res = await fetch('/api/site-config', {
@@ -170,6 +181,29 @@ export default function SettingsPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Brand Name */}
+        <div className="bg-bg-card rounded-2xl p-6 border border-gray-700">
+          <h2 className="text-lg font-semibold text-white mb-4">
+            Brand / Portfolio Name
+          </h2>
+          <hr className="border-gray-700 mb-4" />
+          <div>
+            <label className="block text-text-secondary text-sm mb-1">
+              Brand Name
+            </label>
+            <input
+              type="text"
+              value={form.brandName}
+              onChange={(e) => updateField('brandName', e.target.value)}
+              placeholder="e.g. Neil's Portfolio"
+              className="w-full bg-bg-card-alt border border-gray-700 rounded-xl p-3 text-white focus:border-accent-green focus:outline-none"
+            />
+            <p className="text-text-secondary text-xs mt-2">
+              This name appears in the navbar logo, preloader, admin sidebar, and admin login. Also synced to the navbar logo text and footer name when saved.
+            </p>
+          </div>
+        </div>
+
         {/* Hero Section */}
         <div className="bg-bg-card rounded-2xl p-6 border border-gray-700">
           <h2 className="text-lg font-semibold text-white mb-4">

@@ -131,7 +131,7 @@ const DEFAULT_TYPOGRAPHY: TypographyConfig = {
 
 const DEFAULT_PRELOADER: PreloaderConfig = {
   enabled: true,
-  loadingMessage: "Getting Ishan's portfolio for you",
+  loadingMessage: "Getting Neil's portfolio for you",
 };
 
 /** CSS variable names matching ThemeProvider.tsx exactly */

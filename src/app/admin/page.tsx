@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminLoginPage() {
@@ -8,6 +8,29 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [portfolioName, setPortfolioName] = useState("Neil's Portfolio");
+
+  useEffect(() => {
+    async function fetchPortfolioName() {
+      try {
+        const res = await fetch('/api/site-config');
+        const json = await res.json();
+        const config = json.data;
+        if (config) {
+          const name =
+            config.brandName ||
+            config.navbar?.logoText ||
+            config.footer?.name ||
+            "Neil's Portfolio";
+          setPortfolioName(name);
+        }
+      } catch {
+        // Keep default on error
+      }
+    }
+
+    fetchPortfolioName();
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,9 +61,12 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-bg-primary flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-bg-card rounded-2xl p-8 shadow-card">
-        <h1 className="font-heading text-2xl text-white text-center mb-8">
-          Admin Login
+        <h1 className="font-heading text-2xl text-white text-center mb-2">
+          {portfolioName}
         </h1>
+        <p className="text-text-secondary text-sm text-center mb-8">
+          Admin Login
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

@@ -131,10 +131,12 @@ export interface HeroConfig {
 
 export interface PreloaderConfig {
   readonly enabled: boolean;
+  readonly portfolioName?: string;
   readonly loadingMessage: string;
 }
 
 export interface SiteConfig {
+  readonly brandName?: string;
   readonly hero: HeroConfig;
   readonly skills: readonly string[];
   readonly footer: {

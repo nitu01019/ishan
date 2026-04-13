@@ -39,17 +39,17 @@ function CarouselLayout({ videos, background, animations }: Omit<LongVideosProps
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
-        className={`mt-12 flex gap-6 ${
+        className={`mt-12 flex gap-4 md:gap-6 ${
           showAll
             ? "flex-wrap justify-center"
-            : "overflow-x-auto snap-x snap-mandatory pb-4"
+            : "overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
         }`}
       >
         {visibleVideos.map((video) => (
           <motion.div
             key={video.id}
             variants={item}
-            className={`flex-shrink-0 w-[92%] md:w-[48%] ${showAll ? "" : "snap-center"}`}
+            className={`flex-shrink-0 w-[95vw] max-w-[600px] md:w-[48%] md:max-w-none min-h-[200px] ${showAll ? "" : "snap-center"}`}
           >
             <VideoCard video={video} variant="landscape" />
           </motion.div>
@@ -60,7 +60,7 @@ function CarouselLayout({ videos, background, animations }: Omit<LongVideosProps
         <div className="flex justify-center mt-8">
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 min-h-[48px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
           >
             {showAll ? (
               <>Show Less <ChevronUp className="w-4 h-4" /></>
@@ -110,10 +110,10 @@ function FeaturedLayout({ videos, background, animations }: Omit<LongVideosProps
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-0"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-0"
           >
             {restVideos.map((video) => (
-              <motion.div key={video.id} variants={item}>
+              <motion.div key={video.id} variants={item} className="min-h-[200px]">
                 <VideoCard video={video} variant="landscape" />
               </motion.div>
             ))}
@@ -125,7 +125,7 @@ function FeaturedLayout({ videos, background, animations }: Omit<LongVideosProps
         <div className="flex justify-center mt-8">
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 min-h-[48px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
           >
             {showAll ? (
               <>Show Less <ChevronUp className="w-4 h-4" /></>
@@ -162,7 +162,7 @@ function GridLayout({ videos, background, animations }: Omit<LongVideosProps, 'l
         className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
       >
         {visibleVideos.map((video) => (
-          <motion.div key={video.id} variants={item}>
+          <motion.div key={video.id} variants={item} className="min-h-[200px]">
             <VideoCard video={video} variant="landscape" />
           </motion.div>
         ))}
@@ -172,7 +172,7 @@ function GridLayout({ videos, background, animations }: Omit<LongVideosProps, 'l
         <div className="flex justify-center mt-8">
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 min-h-[48px] rounded-xl border border-border-glow text-white hover:border-accent-green hover:text-accent-green transition-colors text-sm font-medium"
           >
             {showAll ? (
               <>Show Less <ChevronUp className="w-4 h-4" /></>

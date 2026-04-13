@@ -237,7 +237,7 @@ export default function NavStylePage() {
                 type="text"
                 value={form.logoText}
                 onChange={(e) => updateField('logoText', e.target.value)}
-                placeholder="e.g. Ishan"
+                placeholder="e.g. Neil"
                 className="w-full bg-bg-card-alt border border-gray-700 rounded-xl p-3 text-white focus:border-accent-green focus:outline-none"
               />
             </div>

@@ -64,10 +64,10 @@ function VideoSlide({ video, index, playingId, onPlay, onStop }: VideoSlideProps
           />
           <button
             onClick={(e) => { e.stopPropagation(); onStop(); }}
-            className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 flex items-center justify-center transition-colors"
+            className="absolute top-3 right-3 z-20 w-10 h-10 min-w-[48px] min-h-[48px] rounded-full bg-black/70 hover:bg-black/90 flex items-center justify-center transition-colors"
             aria-label="Stop video"
           >
-            <X className="w-4 h-4 text-white" />
+            <X className="w-5 h-5 text-white" />
           </button>
         </>
       ) : isInlinePlaying && !ytId ? (
@@ -83,10 +83,10 @@ function VideoSlide({ video, index, playingId, onPlay, onStop }: VideoSlideProps
           />
           <button
             onClick={(e) => { e.stopPropagation(); onStop(); }}
-            className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 flex items-center justify-center transition-colors"
+            className="absolute top-3 right-3 z-20 w-10 h-10 min-w-[48px] min-h-[48px] rounded-full bg-black/70 hover:bg-black/90 flex items-center justify-center transition-colors"
             aria-label="Stop video"
           >
-            <X className="w-4 h-4 text-white" />
+            <X className="w-5 h-5 text-white" />
           </button>
         </>
       ) : (
@@ -109,9 +109,9 @@ function VideoSlide({ video, index, playingId, onPlay, onStop }: VideoSlideProps
             </div>
           )}
 
-          {/* Play button — min 44x44 for touch targets */}
+          {/* Play button — min 48x48 for touch targets */}
           <div className="absolute inset-0 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-red-600 flex items-center justify-center shadow-xl">
+            <div className="w-14 h-14 md:w-16 md:h-16 min-w-[48px] min-h-[48px] rounded-full bg-red-600 flex items-center justify-center shadow-xl">
               <Play className="w-6 h-6 md:w-7 md:h-7 text-white fill-white ml-0.5" />
             </div>
           </div>
@@ -168,7 +168,7 @@ function GridLayout({ videos, background, animations }: Omit<RecentEditsProps, '
         className="mt-12 max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
       >
         {videos.map((video, index) => (
-          <motion.div key={video.id} variants={item}>
+          <motion.div key={video.id} variants={item} className="min-h-[200px]">
             <VideoSlide
               video={video}
               index={index}
@@ -233,10 +233,10 @@ function FeaturedLayout({ videos, background, animations }: Omit<RecentEditsProp
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
             {restVideos.map((video, index) => (
-              <motion.div key={video.id} variants={item}>
+              <motion.div key={video.id} variants={item} className="min-h-[200px]">
                 <VideoSlide
                   video={video}
                   index={index + 1}
@@ -286,9 +286,9 @@ function CarouselLayout({ videos, background, animations }: Omit<RecentEditsProp
 
       <div className="relative mt-12 max-w-6xl mx-auto px-4">
         <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-6">
+          <div className="flex gap-4 md:gap-6">
             {videos.map((video, index) => (
-              <div key={video.id} className="flex-[0_0_92%] md:flex-[0_0_70%] min-w-0">
+              <div key={video.id} className="flex-[0_0_95%] md:flex-[0_0_70%] min-w-0 min-h-[200px]">
                 <VideoSlide
                   video={video}
                   index={index}
@@ -301,17 +301,17 @@ function CarouselLayout({ videos, background, animations }: Omit<RecentEditsProp
           </div>
         </div>
 
-        {/* Navigation arrows */}
+        {/* Navigation arrows - 48px min touch target */}
         <button
           onClick={scrollPrev}
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-gray-600 bg-bg-primary/80 flex items-center justify-center text-white hover:border-accent-green transition-colors"
+          className="absolute left-0 md:left-2 top-1/2 -translate-y-1/2 w-10 h-10 min-w-[48px] min-h-[48px] rounded-full border border-gray-600 bg-bg-primary/80 flex items-center justify-center text-white hover:border-accent-green transition-colors z-10"
           aria-label="Previous"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={scrollNext}
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-gray-600 bg-bg-primary/80 flex items-center justify-center text-white hover:border-accent-green transition-colors"
+          className="absolute right-0 md:right-2 top-1/2 -translate-y-1/2 w-10 h-10 min-w-[48px] min-h-[48px] rounded-full border border-gray-600 bg-bg-primary/80 flex items-center justify-center text-white hover:border-accent-green transition-colors z-10"
           aria-label="Next"
         >
           <ChevronRight className="w-5 h-5" />

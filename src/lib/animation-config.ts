@@ -1,20 +1,20 @@
 import type { AnimationConfig } from "@/types";
 
 // ---------------------------------------------------------------------------
-// Simple fade variant used on mobile to avoid layout shifts and jank from
-// Y-translation, scale, or flip transforms.
+// Mobile: simple, fast fade — no transforms that cause layout shifts/jank.
+// Uses will-change: opacity for GPU compositing without triggering reflows.
 // ---------------------------------------------------------------------------
 
 const MOBILE_CONTAINER = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.04 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.04, duration: 0.2 } },
 };
 
 const MOBILE_ITEM = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { duration: 0.25, ease: "easeOut" },
+    transition: { duration: 0.2, ease: "easeOut" },
   },
 };
 

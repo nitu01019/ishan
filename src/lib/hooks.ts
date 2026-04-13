@@ -1,18 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 
-/** Returns true when viewport is below the lg breakpoint (1024px) */
+// ---------------------------------------------------------------------------
+// SSR-safe media query hook using useSyncExternalStore
+// Avoids hydration mismatch by returning consistent value on server & client
+// ---------------------------------------------------------------------------
+
+function getServerSnapshot(): boolean {
+  // During SSR assume mobile-first so content is always visible on first paint
+  return true;
+}
+
+/** Returns true when viewport is below the given breakpoint */
 export function useIsMobile(breakpoint = 1024): boolean {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
+  const subscribe = (callback: () => void) => {
     const mql = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
-    setIsMobile(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, [breakpoint]);
+    mql.addEventListener("change", callback);
+    return () => mql.removeEventListener("change", callback);
+  };
 
-  return isMobile;
+  const getSnapshot = () => {
+    return window.matchMedia(`(max-width: ${breakpoint - 1}px)`).matches;
+  };
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

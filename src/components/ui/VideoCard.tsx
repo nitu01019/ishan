@@ -124,10 +124,8 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
 
   const handleClick = () => {
     if (isYouTube && youtubeId) {
-      // Play inline — replace thumbnail with YouTube iframe
       setIsPlaying(true);
     } else if (video.videoUrl) {
-      // Non-YouTube videos: play inline with HTML5 video
       setIsPlaying(true);
     } else {
       onPlay?.();
@@ -156,7 +154,7 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
         className={`relative overflow-hidden rounded-2xl border border-border-glow
           transition-all duration-200
           ${isPlaying ? "" : "hover:border-border-glow-hover hover:-translate-y-1 hover:shadow-green cursor-pointer"}
-          ${isPortrait ? "aspect-[9/16] min-h-[420px] sm:min-h-[400px]" : "aspect-video min-h-[180px] sm:min-h-[220px]"}`}
+          ${isPortrait ? "aspect-[9/16] bg-black" : "aspect-video"}`}
         onClick={isPlaying ? undefined : handleClick}
         onKeyDown={isPlaying ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
         role={isPlaying ? undefined : "button"}
@@ -187,7 +185,6 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
               loading="lazy"
               title={video.title}
             />
-            {/* Close / stop button */}
             <button
               onClick={handleStop}
               className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 flex items-center justify-center transition-colors"
@@ -207,7 +204,6 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
               playsInline
               title={video.title}
             />
-            {/* Close / stop button */}
             <button
               onClick={handleStop}
               className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 flex items-center justify-center transition-colors"
@@ -227,7 +223,7 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
                 <img
                   src={video.thumbnailUrl}
                   alt={video.title}
-                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:scale-105 ${
                     imageLoaded ? "opacity-100" : "opacity-0"
                   }`}
                   loading="lazy"

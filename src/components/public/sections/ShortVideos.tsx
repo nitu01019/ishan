@@ -38,11 +38,11 @@ function GridLayout({ videos, background, animations }: Omit<ShortVideosProps, '
         variants={container}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-6 px-4 md:px-0 max-w-7xl mx-auto"
+        viewport={{ once: true, amount: 0.05 }}
+        className="mt-12 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 px-4 md:px-0 max-w-7xl mx-auto"
       >
         {visibleVideos.map((video, i) => (
-          <motion.div key={video.id} variants={item} className="min-h-[420px] sm:min-h-0">
+          <motion.div key={video.id} variants={item}>
             <VideoCard video={video} variant="portrait" showSound={i === 1} />
           </motion.div>
         ))}
@@ -101,11 +101,11 @@ function FeaturedLayout({ videos, background, animations }: Omit<ShortVideosProp
             variants={container}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-4"
+            viewport={{ once: true, amount: 0.05 }}
+            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
           >
             {restVideos.map((video, i) => (
-              <motion.div key={video.id} variants={item} className="min-h-[420px] sm:min-h-0">
+              <motion.div key={video.id} variants={item}>
                 <VideoCard video={video} variant="portrait" showSound={i === 0} />
               </motion.div>
             ))}
@@ -133,11 +133,13 @@ function FeaturedLayout({ videos, background, animations }: Omit<ShortVideosProp
 
 // ---------------------------------------------------------------------------
 // Layout: Carousel (default) - horizontal scroll with snap
+// On mobile: uses CSS scroll instead of framer-motion whileInView on children
+// to avoid IntersectionObserver failures inside overflow containers.
 // ---------------------------------------------------------------------------
 
 function CarouselLayout({ videos, background, animations }: Omit<ShortVideosProps, 'layout'>) {
   const isMobile = useIsMobile(768);
-  const { container, item } = getCardVariants(animations, isMobile);
+  const { item } = getCardVariants(animations, isMobile);
   const [showAll, setShowAll] = useState(false);
   const visibleVideos = showAll ? videos : videos.slice(0, INITIAL_COUNT);
   const hasMore = videos.length > INITIAL_COUNT;
@@ -146,26 +148,25 @@ function CarouselLayout({ videos, background, animations }: Omit<ShortVideosProp
     <section className="py-4 md:py-6 lg:py-8" style={getSectionStyle(background)}>
       <SectionTitle text="Short Videos" highlight="Videos" />
 
+      {/* Animate the section into view, but children are immediately visible */}
       <motion.div
-        variants={container}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        className={`mt-12 flex gap-4 md:gap-6 px-4 md:px-0 max-w-7xl mx-auto ${
+        initial={item.hidden}
+        whileInView={item.visible}
+        viewport={{ once: true, amount: 0.05 }}
+        className={`mt-12 flex gap-3 md:gap-6 px-4 md:px-0 max-w-7xl mx-auto ${
           showAll
             ? "flex-wrap justify-center"
-            : "overflow-x-auto md:overflow-visible md:justify-center pb-4"
+            : "overflow-x-auto md:overflow-visible md:justify-center pb-4 snap-x snap-mandatory"
         }`}
         style={showAll ? undefined : { scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
       >
         {visibleVideos.map((video, i) => (
-          <motion.div
+          <div
             key={video.id}
-            variants={item}
-            className="flex-shrink-0 w-[85vw] max-w-[320px] sm:w-[280px] md:w-[300px]"
+            className={`flex-shrink-0 w-[75vw] max-w-[340px] sm:w-[300px] md:w-[320px] ${showAll ? "" : "snap-center"}`}
           >
             <VideoCard video={video} variant="portrait" showSound={i === 1} />
-          </motion.div>
+          </div>
         ))}
       </motion.div>
 

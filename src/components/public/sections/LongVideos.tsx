@@ -25,7 +25,7 @@ const INITIAL_COUNT = 4;
 
 function CarouselLayout({ videos, background, animations }: Omit<LongVideosProps, 'layout'>) {
   const isMobile = useIsMobile(768);
-  const { container, item } = getCardVariants(animations, isMobile);
+  const { item } = getCardVariants(animations, isMobile);
   const [showAll, setShowAll] = useState(false);
   const visibleVideos = showAll ? videos : videos.slice(0, INITIAL_COUNT);
   const hasMore = videos.length > INITIAL_COUNT;
@@ -35,24 +35,23 @@ function CarouselLayout({ videos, background, animations }: Omit<LongVideosProps
       <SectionTitle text="Long Videos" highlight="Videos" />
 
       <motion.div
-        variants={container}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
+        initial={item.hidden}
+        whileInView={item.visible}
+        viewport={{ once: true, amount: 0.05 }}
         className={`mt-12 flex gap-4 md:gap-6 ${
           showAll
             ? "flex-wrap justify-center"
             : "overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
         }`}
+        style={showAll ? undefined : { scrollbarWidth: "none" }}
       >
         {visibleVideos.map((video) => (
-          <motion.div
+          <div
             key={video.id}
-            variants={item}
-            className={`flex-shrink-0 w-[95vw] max-w-[600px] md:w-[48%] md:max-w-none min-h-[200px] ${showAll ? "" : "snap-center"}`}
+            className={`flex-shrink-0 w-[92vw] max-w-[640px] md:w-[48%] md:max-w-none ${showAll ? "" : "snap-center"}`}
           >
             <VideoCard video={video} variant="landscape" />
-          </motion.div>
+          </div>
         ))}
       </motion.div>
 
@@ -109,11 +108,11 @@ function FeaturedLayout({ videos, background, animations }: Omit<LongVideosProps
             variants={container}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
+            viewport={{ once: true, amount: 0.05 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-0"
           >
             {restVideos.map((video) => (
-              <motion.div key={video.id} variants={item} className="min-h-[200px]">
+              <motion.div key={video.id} variants={item}>
                 <VideoCard video={video} variant="landscape" />
               </motion.div>
             ))}
@@ -158,11 +157,11 @@ function GridLayout({ videos, background, animations }: Omit<LongVideosProps, 'l
         variants={container}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
+        viewport={{ once: true, amount: 0.05 }}
         className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
       >
         {visibleVideos.map((video) => (
-          <motion.div key={video.id} variants={item} className="min-h-[200px]">
+          <motion.div key={video.id} variants={item}>
             <VideoCard video={video} variant="landscape" />
           </motion.div>
         ))}

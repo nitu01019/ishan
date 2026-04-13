@@ -152,7 +152,7 @@ function GridLayout({ videos, background, animations }: Omit<RecentEditsProps, '
       <motion.div
         initial={item.hidden}
         whileInView={item.visible}
-        viewport={{ once: true, amount: 0.3 }}
+        viewport={{ once: true, amount: 0.1 }}
       >
         <SectionTitle text="My Recent Edits" highlight="Edits" />
         <p className="text-text-secondary text-center max-w-2xl mx-auto mt-4 px-4">
@@ -164,11 +164,11 @@ function GridLayout({ videos, background, animations }: Omit<RecentEditsProps, '
         variants={container}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
+        viewport={{ once: true, amount: 0.05 }}
         className="mt-12 max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
       >
         {videos.map((video, index) => (
-          <motion.div key={video.id} variants={item} className="min-h-[200px]">
+          <motion.div key={video.id} variants={item}>
             <VideoSlide
               video={video}
               index={index}
@@ -199,7 +199,7 @@ function FeaturedLayout({ videos, background, animations }: Omit<RecentEditsProp
       <motion.div
         initial={item.hidden}
         whileInView={item.visible}
-        viewport={{ once: true, amount: 0.3 }}
+        viewport={{ once: true, amount: 0.1 }}
       >
         <SectionTitle text="My Recent Edits" highlight="Edits" />
         <p className="text-text-secondary text-center max-w-2xl mx-auto mt-4 px-4">
@@ -232,11 +232,11 @@ function FeaturedLayout({ videos, background, animations }: Omit<RecentEditsProp
             variants={container}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
+            viewport={{ once: true, amount: 0.05 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
             {restVideos.map((video, index) => (
-              <motion.div key={video.id} variants={item} className="min-h-[200px]">
+              <motion.div key={video.id} variants={item}>
                 <VideoSlide
                   video={video}
                   index={index + 1}
@@ -276,7 +276,7 @@ function CarouselLayout({ videos, background, animations }: Omit<RecentEditsProp
       <motion.div
         initial={item.hidden}
         whileInView={item.visible}
-        viewport={{ once: true, amount: 0.3 }}
+        viewport={{ once: true, amount: 0.1 }}
       >
         <SectionTitle text="My Recent Edits" highlight="Edits" />
         <p className="text-text-secondary text-center max-w-2xl mx-auto mt-4 px-4">
@@ -288,7 +288,7 @@ function CarouselLayout({ videos, background, animations }: Omit<RecentEditsProp
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex gap-4 md:gap-6">
             {videos.map((video, index) => (
-              <div key={video.id} className="flex-[0_0_95%] md:flex-[0_0_70%] min-w-0 min-h-[200px]">
+              <div key={video.id} className="flex-[0_0_92%] md:flex-[0_0_70%] min-w-0">
                 <VideoSlide
                   video={video}
                   index={index}

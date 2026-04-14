@@ -195,7 +195,7 @@ export default function SettingsPage() {
               type="text"
               value={form.brandName}
               onChange={(e) => updateField('brandName', e.target.value)}
-              placeholder="e.g. Neil's Portfolio"
+              placeholder="e.g. Neal's Portfolio"
               className="w-full bg-bg-card-alt border border-gray-700 rounded-xl p-3 text-white focus:border-accent-green focus:outline-none"
             />
             <p className="text-text-secondary text-xs mt-2">

@@ -8,12 +8,23 @@ const Spline = lazy(() => import('@splinetool/react-spline'))
 function SplineLoader() {
   return (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="text-center">
-        <div className="w-16 h-16 mx-auto mb-3 relative">
-          <div className="absolute inset-0 rounded-full border-2 border-accent-green/20" />
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-accent-green animate-spin" />
+      <div className="w-full max-w-[320px] flex flex-col items-center gap-6 animate-pulse">
+        {/* Head */}
+        <div className="w-20 h-20 rounded-full bg-white/5" />
+        {/* Shoulders + torso */}
+        <div className="w-40 h-6 rounded-full bg-white/5" />
+        <div className="w-32 h-28 rounded-2xl bg-white/5" />
+        {/* Arms */}
+        <div className="flex w-full justify-between -mt-24">
+          <div className="w-8 h-24 rounded-xl bg-white/5" />
+          <div className="w-8 h-24 rounded-xl bg-white/5" />
         </div>
-        <p className="text-white/40 text-sm">Loading 3D scene…</p>
+        {/* Legs */}
+        <div className="flex gap-6 mt-2">
+          <div className="w-10 h-28 rounded-xl bg-white/5" />
+          <div className="w-10 h-28 rounded-xl bg-white/5" />
+        </div>
+        <p className="text-white/30 text-sm mt-2">Loading 3D scene&#8230;</p>
       </div>
     </div>
   )
@@ -59,6 +70,7 @@ interface SplineSceneProps {
 export function SplineScene({ scene, className }: SplineSceneProps) {
   const [retryKey, setRetryKey] = useState(0)
   const [retries, setRetries] = useState(0)
+  const [loaded, setLoaded] = useState(false)
   const maxRetries = 2
 
   const handleError = useCallback(() => {
@@ -74,7 +86,12 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
   useEffect(() => {
     setRetries(0)
     setRetryKey(0)
+    setLoaded(false)
   }, [scene])
+
+  const handleLoad = useCallback(() => {
+    setLoaded(true)
+  }, [])
 
   const errorFallback = (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black">
@@ -105,7 +122,20 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
   return (
     <SplineErrorBoundary key={retryKey} fallback={errorFallback} onError={handleError}>
       <Suspense fallback={<SplineLoader />}>
-        <Spline scene={scene} className={className} />
+        <div className="relative w-full h-full">
+          {/* Skeleton placeholder shown until Spline fires onLoad */}
+          {!loaded && (
+            <div className="absolute inset-0 z-10">
+              <SplineLoader />
+            </div>
+          )}
+          <div
+            className="w-full h-full transition-opacity duration-700 ease-out"
+            style={{ opacity: loaded ? 1 : 0 }}
+          >
+            <Spline scene={scene} className={className} onLoad={handleLoad} />
+          </div>
+        </div>
       </Suspense>
     </SplineErrorBoundary>
   )

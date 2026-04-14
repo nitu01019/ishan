@@ -8,7 +8,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [portfolioName, setPortfolioName] = useState("Neil's Portfolio");
+  const [portfolioName, setPortfolioName] = useState("Neal's Portfolio");
 
   useEffect(() => {
     async function fetchPortfolioName() {
@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
             config.brandName ||
             config.navbar?.logoText ||
             config.footer?.name ||
-            "Neil's Portfolio";
+            "Neal's Portfolio";
           setPortfolioName(name);
         }
       } catch {

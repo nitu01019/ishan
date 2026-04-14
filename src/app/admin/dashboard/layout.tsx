@@ -37,7 +37,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [authenticated, setAuthenticated] = useState(false);
   const [checking, setChecking] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [portfolioName, setPortfolioName] = useState("Neil's Portfolio");
+  const [portfolioName, setPortfolioName] = useState("Neal's Portfolio");
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
@@ -73,7 +73,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             config.brandName ||
             config.navbar?.logoText ||
             config.footer?.name ||
-            "Neil's Portfolio";
+            "Neal's Portfolio";
           setPortfolioName(name);
         }
       } catch {

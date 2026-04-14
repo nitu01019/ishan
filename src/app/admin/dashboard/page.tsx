@@ -199,7 +199,7 @@ function DatabaseStatusBadge({
 
 export default function DashboardPage() {
   const [state, setState] = useState<DashboardState>(INITIAL_STATE);
-  const [portfolioName, setPortfolioName] = useState("Neil");
+  const [portfolioName, setPortfolioName] = useState("Neal");
 
   useEffect(() => {
     async function loadStats() {
@@ -239,7 +239,7 @@ export default function DashboardPage() {
             config.brandName ||
             config.navbar?.logoText ||
             config.footer?.name ||
-            "Neil";
+            "Neal";
           setPortfolioName(name);
         }
       } catch {

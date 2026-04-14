@@ -50,7 +50,7 @@ export const defaultNavConfig: NavConfig = {
   transparent: true,
   opacity: 3,
   sticky: true,
-  logoText: "Neil",
+  logoText: "Neal",
   ctaText: "Hire me",
 } as const;
 
@@ -85,8 +85,8 @@ export const defaultHeroConfig: HeroConfig = {
  */
 export const defaultPreloaderConfig: PreloaderConfig = {
   enabled: true,
-  portfolioName: "Neil's portfolio",
-  loadingMessage: "Getting Neil's portfolio for you",
+  portfolioName: "Neal's portfolio",
+  loadingMessage: "Getting Neal's portfolio for you",
 } as const;
 
 /**

@@ -12,7 +12,7 @@ interface PreloaderProps {
 }
 
 export default function Preloader({
-  portfolioName = "Neil's Portfolio",
+  portfolioName = "Neal's Portfolio",
   loadingMessage = "Loading...",
 }: PreloaderProps) {
   const [progress, setProgress] = useState(0);
@@ -20,10 +20,32 @@ export default function Preloader({
   const [show, setShow] = useState(true);
   const minTimeRef = useRef<number>(Date.now());
 
-  // Remove the SSR preloader overlay once this JS component mounts
+  // Seamlessly hand off from SSR preloader to this client preloader.
+  // Instead of instantly removing the SSR overlay (which can cause a flash
+  // if this component hasn't painted yet), we fade it out with a CSS
+  // transition so both layers overlap briefly — both are opaque black,
+  // so the user sees no flicker.
   useEffect(() => {
     const ssrOverlay = document.getElementById("ssr-preloader");
-    if (ssrOverlay) ssrOverlay.remove();
+    if (!ssrOverlay) return;
+
+    // Wait one frame so this component's DOM is painted first
+    requestAnimationFrame(() => {
+      // Cancel the CSS fade-out animation so we control opacity directly
+      ssrOverlay.style.animation = "none";
+      ssrOverlay.style.transition = "opacity 0.3s ease-out";
+      ssrOverlay.style.opacity = "0";
+      ssrOverlay.style.pointerEvents = "none";
+
+      // Remove the element from the DOM after the transition completes
+      const handleEnd = () => {
+        ssrOverlay.remove();
+      };
+      ssrOverlay.addEventListener("transitionend", handleEnd, { once: true });
+
+      // Safety fallback: remove after 500ms even if transitionend doesn't fire
+      setTimeout(handleEnd, 500);
+    });
   }, []);
 
   // Hard timeout — ALWAYS hide after 4 seconds, even if progress didn't finish

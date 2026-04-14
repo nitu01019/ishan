@@ -95,7 +95,7 @@ export default async function RootLayout({
   const preloaderPortfolioName =
     siteConfig.preloader?.portfolioName ||
     siteConfig.navbar?.logoText ||
-    "Neil's Portfolio";
+    "Neal's Portfolio";
   const preloaderLoadingMessage =
     siteConfig.preloader?.loadingMessage || "Loading...";
 
@@ -409,10 +409,11 @@ export default async function RootLayout({
         />
 
         <ThemeProvider>
-          {/* SSR preloader — auto-hides via CSS after 5s even if JS fails */}
+          {/* SSR preloader — stays fully opaque for 2s, then fades as CSS fallback if JS never loads.
+               When JS hydrates, the client Preloader takes over and fades this out via transition. */}
           <style dangerouslySetInnerHTML={{ __html: `
-            @keyframes ssrFadeOut { 0%,80% { opacity:1; } 100% { opacity:0; pointer-events:none; } }
-            #ssr-preloader { animation: ssrFadeOut 5s ease-in forwards; }
+            @keyframes ssrFadeOut { 0%,90% { opacity:1; } 100% { opacity:0; pointer-events:none; } }
+            #ssr-preloader { animation: ssrFadeOut 6s ease-in 2s forwards; }
           `}} />
           <div
             id="ssr-preloader"

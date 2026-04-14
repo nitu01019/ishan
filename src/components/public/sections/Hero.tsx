@@ -12,8 +12,25 @@ import type { SectionBackground } from "@/types";
 
 function SplineLoadingPlaceholder() {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-black/50">
-      <div className="w-24 h-24 rounded-full bg-accent-green/20 animate-pulse" />
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black">
+      <div className="flex flex-col items-center gap-4 animate-pulse">
+        {/* Head */}
+        <div className="w-20 h-20 rounded-full bg-white/5" />
+        {/* Shoulders */}
+        <div className="w-44 h-5 rounded-full bg-white/5 -mb-1" />
+        {/* Torso */}
+        <div className="w-36 h-32 rounded-2xl bg-white/5" />
+        {/* Arms alongside torso */}
+        <div className="flex w-56 justify-between -mt-28">
+          <div className="w-8 h-24 rounded-xl bg-white/5" />
+          <div className="w-8 h-24 rounded-xl bg-white/5" />
+        </div>
+        {/* Legs */}
+        <div className="flex gap-5 mt-4">
+          <div className="w-11 h-28 rounded-xl bg-white/5" />
+          <div className="w-11 h-28 rounded-xl bg-white/5" />
+        </div>
+      </div>
     </div>
   );
 }

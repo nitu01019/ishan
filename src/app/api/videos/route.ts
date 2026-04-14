@@ -11,7 +11,8 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Vi
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category") ?? undefined;
-    const includeHidden = await isAuthenticated();
+    const userAgent = request.headers.get("user-agent") || "";
+    const includeHidden = await isAuthenticated(userAgent);
     const videos = await getVideos(category, includeHidden);
 
     return NextResponse.json({ success: true, data: videos });
@@ -23,7 +24,8 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Vi
 
 export async function POST(request: Request): Promise<NextResponse<ApiResponse<{ id: string }>>> {
   try {
-    const authenticated = await isAuthenticated();
+    const userAgent = request.headers.get("user-agent") || "";
+    const authenticated = await isAuthenticated(userAgent);
     if (!authenticated) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }

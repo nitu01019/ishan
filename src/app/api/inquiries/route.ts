@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { isAuthenticated } from "@/lib/auth";
 import { getInquiries, createInquiry } from "@/lib/db";
 import type { ApiResponse, Inquiry } from "@/types";
@@ -7,7 +8,9 @@ export const runtime = 'nodejs';
 
 export async function GET(): Promise<NextResponse<ApiResponse<Inquiry[]>>> {
   try {
-    const authenticated = await isAuthenticated();
+    const requestHeaders = await headers();
+    const userAgent = requestHeaders.get("user-agent") || "";
+    const authenticated = await isAuthenticated(userAgent);
     if (!authenticated) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }

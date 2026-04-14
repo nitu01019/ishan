@@ -16,7 +16,8 @@ export async function PUT(
   context: RouteContext
 ): Promise<NextResponse<ApiResponse<null>>> {
   try {
-    const authenticated = await isAuthenticated();
+    const userAgent = request.headers.get("user-agent") || "";
+    const authenticated = await isAuthenticated(userAgent);
     if (!authenticated) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
@@ -34,11 +35,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   context: RouteContext
 ): Promise<NextResponse<ApiResponse<null>>> {
   try {
-    const authenticated = await isAuthenticated();
+    const userAgent = request.headers.get("user-agent") || "";
+    const authenticated = await isAuthenticated(userAgent);
     if (!authenticated) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }

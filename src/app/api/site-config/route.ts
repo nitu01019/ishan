@@ -20,7 +20,8 @@ export async function GET(): Promise<NextResponse<ApiResponse<SiteConfig>>> {
 
 export async function PUT(request: Request): Promise<NextResponse<ApiResponse<null>>> {
   try {
-    const authenticated = await isAuthenticated();
+    const userAgent = request.headers.get("user-agent") || "";
+    const authenticated = await isAuthenticated(userAgent);
     if (!authenticated) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }

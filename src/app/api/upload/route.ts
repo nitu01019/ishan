@@ -22,7 +22,8 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB (server route for small files o
 
 export async function POST(request: Request): Promise<NextResponse<ApiResponse<{ url: string }>>> {
   try {
-    const authenticated = await isAuthenticated();
+    const userAgent = request.headers.get("user-agent") || "";
+    const authenticated = await isAuthenticated(userAgent);
     if (!authenticated) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
@@ -63,17 +64,13 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<{
 
     if (!url) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Storage is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local",
-        },
+        { success: false, error: "Storage is not available. Contact the administrator." },
         { status: 503 },
       );
     }
 
     return NextResponse.json({ success: true, data: { url } }, { status: 201 });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Upload failed";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ success: false, error: "Upload failed" }, { status: 500 });
   }
 }

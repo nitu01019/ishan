@@ -10,8 +10,7 @@ export async function POST(): Promise<NextResponse<ApiResponse<null>>> {
     await destroySession();
 
     return NextResponse.json({ success: true, data: null });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Logout failed";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ success: false, error: "Logout failed" }, { status: 500 });
   }
 }

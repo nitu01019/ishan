@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, Component } from 'react'
+import { useState, useEffect, useCallback, useRef, Component, memo } from 'react'
 import type { ReactNode } from 'react'
 // Use /next subpath: the default entry ships as an async RSC component incompatible with client-only rendering.
 import Spline from '@splinetool/react-spline/next'
@@ -91,14 +91,22 @@ interface SplineSceneProps {
   className?: string
 }
 
-export function SplineScene({ scene, className }: SplineSceneProps) {
+function SplineSceneInner({ scene, className }: SplineSceneProps) {
   const [retryKey, setRetryKey] = useState(0)
   const [retries, setRetries] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Once Spline has successfully loaded, treat subsequent errors as non-fatal
+  // (e.g., the runtime's own scene version migration). Retrying after load
+  // remounts the <Spline /> component and causes a flicker loop.
+  const hasLoadedRef = useRef(false)
   const maxRetries = 2
 
   const handleError = useCallback(() => {
+    if (hasLoadedRef.current) {
+      console.warn('[SplineScene] post-load error ignored to prevent flicker loop')
+      return
+    }
     if (retries < maxRetries) {
       if (retryTimerRef.current !== null) {
         clearTimeout(retryTimerRef.current)
@@ -115,6 +123,7 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
   }, [retries])
 
   useEffect(() => {
+    hasLoadedRef.current = false
     setRetries(0)
     setRetryKey(0)
     setLoaded(false)
@@ -130,6 +139,7 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
   }, [])
 
   const handleLoad = useCallback(() => {
+    hasLoadedRef.current = true
     setLoaded(true)
   }, [])
 
@@ -178,3 +188,7 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
     </SplineErrorBoundary>
   )
 }
+
+// Memo prevents parent re-renders (e.g., Hero's word-rotation interval) from
+// resetting this component, which would re-trigger the load cycle.
+export const SplineScene = memo(SplineSceneInner)

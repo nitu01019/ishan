@@ -10,6 +10,8 @@ import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import { getSectionStyle } from "@/lib/section-style";
 import type { SectionBackground } from "@/types";
 
+const SPLINE_SCENE_URL = "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode";
+
 function SplineLoadingPlaceholder() {
   return (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black">
@@ -240,12 +242,13 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
             </motion.div>
           </motion.div>
 
-          {/* Right: 3D Spline scene -- CSS hidden on mobile, visible on lg+ */}
+          {/* Right: 3D Spline scene — scene URL is module-level constant to ensure
+              stable prop identity across Hero re-renders (word-rotation ticks every 2s). */}
           {shouldShowSpline && (
             <div className="hidden lg:block flex-1 relative">
               {shouldLoadSpline ? (
                 <SplineScene
-                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                  scene={SPLINE_SCENE_URL}
                   className="w-full h-full"
                 />
               ) : (

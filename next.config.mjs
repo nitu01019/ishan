@@ -51,7 +51,7 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.spline.design https://unpkg.com https://www.youtube-nocookie.com https://img.youtube.com",
               "frame-src https://www.youtube-nocookie.com https://www.youtube.com",
-              "media-src 'self' blob:",
+              "media-src 'self' blob: data:",
               "worker-src 'self' blob:",
               "frame-ancestors 'none'",
             ].join("; "),

@@ -83,6 +83,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
   const wordIndexRef = useRef(0);
   const wordsLengthRef = useRef(words.length);
   wordsLengthRef.current = words.length;
+  const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -128,6 +129,45 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
     };
   }, [shouldShowSpline]);
 
+  // Forward pointermove events from the whole hero section to the Spline canvas
+  // so the robot tracks the cursor even while hovering over text / overlays
+  // that sit above the absolute full-width canvas.
+  useEffect(() => {
+    if (!shouldLoadSpline) return;
+    const section = heroRef.current;
+    if (!section) return;
+    let canvas: HTMLCanvasElement | null = null;
+    let disposed = false;
+
+    const tryAttach = () => {
+      if (disposed) return;
+      const c = section.querySelector('canvas');
+      if (c) {
+        canvas = c;
+        return;
+      }
+      requestAnimationFrame(tryAttach);
+    };
+    tryAttach();
+
+    const forward = (e: PointerEvent) => {
+      if (!canvas || e.target === canvas) return;
+      canvas.dispatchEvent(new PointerEvent('pointermove', {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        bubbles: false,
+        cancelable: true,
+        pointerType: 'mouse',
+      }));
+    };
+
+    section.addEventListener('pointermove', forward, { passive: true });
+    return () => {
+      disposed = true;
+      section.removeEventListener('pointermove', forward);
+    };
+  }, [shouldLoadSpline]);
+
   const displayHeadline = headline || "Unleash Your {word} Potential With Pro Video Editing";
   const hasWordPlaceholder = displayHeadline.includes("{word}");
   const headlineParts = hasWordPlaceholder ? displayHeadline.split("{word}") : null;
@@ -139,7 +179,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
   const bgStyle = getSectionStyle(background);
 
   return (
-    <section aria-label="Hero" className="min-h-svh pt-16" style={bgStyle}>
+    <section ref={heroRef} aria-label="Hero" className="min-h-svh pt-16" style={bgStyle}>
       <Card className="w-full min-h-[calc(100svh-4rem)] bg-black/[0.96] relative overflow-hidden border-0 rounded-none">
         <Spotlight
           className="from-accent-green/20 via-accent-teal/10 to-transparent hidden md:block"
@@ -148,13 +188,33 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
 
         <div className="absolute inset-0 hero-glow animate-glow-pulse pointer-events-none" />
 
+        {/* Spline canvas as full-width absolute overlay (desktop only).
+            Padded on the right so the robot doesn't touch the far edge. */}
+        {shouldShowSpline && (
+          <div className="hidden lg:block absolute inset-0 z-0 pointer-events-none lg:pr-[3vw]">
+            {shouldLoadSpline ? (
+              <SplineScene scene={SPLINE_SCENE_URL} className="w-full h-full" />
+            ) : (
+              <SplineLoadingPlaceholder />
+            )}
+          </div>
+        )}
+
+        {/* Legibility gradient: darkens the left half so text stays readable
+            when the robot canvas sits behind it. Assumes robot-right (default);
+            if robotPosition === 'left' the gradient would need to be mirrored. */}
+        <div
+          aria-hidden
+          className="hidden lg:block absolute inset-0 z-[5] pointer-events-none bg-[linear-gradient(to_right,rgba(0,0,0,0.88)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0)_60%)]"
+        />
+
         <div className={`flex flex-col h-full min-h-[calc(100svh-4rem)] ${robotPosition === 'left' ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
           {/* Left: text content */}
           <motion.div
             variants={container}
             initial="hidden"
             animate="visible"
-            className="flex-1 relative z-10 flex flex-col justify-center p-5 sm:p-8 md:p-12 lg:p-16"
+            className="flex-1 relative z-10 flex flex-col justify-center p-5 sm:p-8 md:p-12 lg:p-16 lg:max-w-[55%]"
           >
             <motion.h1
               variants={item}
@@ -242,20 +302,8 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
             </motion.div>
           </motion.div>
 
-          {/* Right: 3D Spline scene — scene URL is module-level constant to ensure
-              stable prop identity across Hero re-renders (word-rotation ticks every 2s). */}
-          {shouldShowSpline && (
-            <div className="hidden lg:block flex-1 relative">
-              {shouldLoadSpline ? (
-                <SplineScene
-                  scene={SPLINE_SCENE_URL}
-                  className="w-full h-full"
-                />
-              ) : (
-                <SplineLoadingPlaceholder />
-              )}
-            </div>
-          )}
+          {/* Right column intentionally empty on desktop — the 3D Spline scene
+              is now rendered as a full-width absolute overlay above the Card. */}
         </div>
       </Card>
     </section>

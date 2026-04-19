@@ -4,12 +4,32 @@
 
 html {
   scroll-behavior: smooth;
+  /* Force GPU-accelerated momentum scroll on iOS/Android. */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* On touch devices smooth scroll + JS scroll handlers cause jank. */
+@media (hover: none) and (pointer: coarse) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
   background-color: rgb(var(--bg-primary-rgb));
   color: rgb(var(--text-primary-rgb));
   font-family: var(--font-body), sans-serif;
+  /* Allow native momentum scrolling; prevent horizontal scroll from oversized layers. */
+  overflow-x: hidden;
+}
+
+/* Sections below the fold get content-visibility so the browser can skip
+   layout/paint while they're offscreen. Identified by having an id
+   (#work, #services, #pricing, #testimonials, ...). Hero has no id,
+   so it always renders eagerly. */
+main section[id] {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
 }
 
 /* Theme colors — dynamically set by ThemeProvider */
@@ -99,18 +119,50 @@ body {
   background: #374151;
 }
 
-/* Reduced motion */
+/* Reduced motion: kill ALL decorative animations. */
 @media (prefers-reduced-motion: reduce) {
   .animate-scroll-left,
   .animate-scroll-right,
   .animate-spin,
   .animate-pulse,
-  .animate-ping {
+  .animate-ping,
+  .animate-glow-pulse,
+  .animate-shine,
+  .animate-mesh-move,
+  .animate-mesh-move-reverse,
+  .animate-spotlight {
     animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* Mobile: disable continuous decorative animations that drain battery
+   and cause compositor thrash on low-end GPUs. */
+@media (max-width: 1023px) {
+  .animate-glow-pulse,
+  .animate-shine,
+  .animate-mesh-move,
+  .animate-mesh-move-reverse {
+    animation: none !important;
+  }
+
+  /* backdrop-filter is extremely expensive on mobile GPUs.
+     Neutralize any accidental use; components should use solid bg on mobile. */
+  .mobile-no-blur,
+  .mobile-no-blur * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 

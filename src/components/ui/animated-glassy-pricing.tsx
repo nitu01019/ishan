@@ -19,6 +19,14 @@ const ShaderCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    // Skip WebGL shader entirely on mobile / touch devices / reduced-motion
+    // preferences. The CSS background gradient below is the fallback.
+    if (typeof window === "undefined") return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isSmallViewport = window.matchMedia("(max-width: 1023px)").matches;
+    const isCoarsePointer = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    if (prefersReducedMotion || isSmallViewport || isCoarsePointer) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const gl = canvas.getContext('webgl');
@@ -86,7 +94,10 @@ const ShaderCanvas = () => {
     const bgColorLoc = gl.getUniformLocation(program, 'uBackgroundColor');
     gl.uniform3fv(bgColorLoc, new Float32Array([0.043, 0.067, 0.125]));
 
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
+    let isVisible = false;
+    let isTabVisible = !document.hidden;
+
     const render = (time: number) => {
       gl.uniform1f(iTimeLoc, time * 0.001);
       gl.uniform2f(iResLoc, canvas.width, canvas.height);
@@ -94,30 +105,77 @@ const ShaderCanvas = () => {
       animationFrameId = requestAnimationFrame(render);
     };
 
-    const parentEl = canvas.parentElement;
-    const handleResize = () => {
-      if (parentEl) {
-        canvas.width = parentEl.clientWidth;
-        canvas.height = parentEl.clientHeight;
-      } else {
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
+    const startLoop = () => {
+      if (animationFrameId !== null) return;
+      if (!isVisible || !isTabVisible) return;
+      animationFrameId = requestAnimationFrame(render);
+    };
+    const stopLoop = () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
       }
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    };
+
+    const parentEl = canvas.parentElement;
+    let resizeRaf: number | null = null;
+    const handleResize = () => {
+      if (resizeRaf !== null) return;
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = null;
+        if (parentEl) {
+          canvas.width = parentEl.clientWidth;
+          canvas.height = parentEl.clientHeight;
+        } else {
+          canvas.width = canvas.clientWidth;
+          canvas.height = canvas.clientHeight;
+        }
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      });
     };
 
     handleResize();
     const resizeObserver = new ResizeObserver(handleResize);
     if (parentEl) resizeObserver.observe(parentEl);
 
-    animationFrameId = requestAnimationFrame(render);
+    // Pause rendering when the canvas is offscreen — massive CPU/GPU savings.
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        isVisible = !!entry?.isIntersecting;
+        if (isVisible) startLoop();
+        else stopLoop();
+      },
+      { rootMargin: "100px" }
+    );
+    visibilityObserver.observe(canvas);
+
+    const onTabVisibility = () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible) startLoop();
+      else stopLoop();
+    };
+    document.addEventListener("visibilitychange", onTabVisibility);
+
     return () => {
       resizeObserver.disconnect();
-      cancelAnimationFrame(animationFrameId);
+      visibilityObserver.disconnect();
+      document.removeEventListener("visibilitychange", onTabVisibility);
+      if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
+      stopLoop();
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block z-0 rounded-2xl" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full block z-0 rounded-2xl"
+      style={{
+        background:
+          "radial-gradient(ellipse at 50% 50%, rgba(0,230,118,0.12) 0%, rgba(11,17,32,0) 60%), linear-gradient(135deg, #0b1120 0%, #111827 100%)",
+      }}
+    />
+  );
 };
 
 export interface GlassyPricingCardProps {
@@ -134,10 +192,11 @@ export interface GlassyPricingCardProps {
 export const GlassyPricingCard = ({
   planName, description, price, features, buttonText, isPopular = false, buttonVariant = 'primary', href
 }: GlassyPricingCardProps) => {
+  // backdrop-filter and backdrop-brightness are GPU-expensive; apply only at lg+.
   const cardClasses = `
-    backdrop-blur-[14px] backdrop-brightness-[0.91] bg-gradient-to-br rounded-2xl shadow-xl w-full md:flex-1 md:max-w-xs px-5 md:px-7 py-8 flex flex-col transition-all duration-300
-    from-white/10 to-white/5 border border-white/10
-    ${isPopular ? 'md:scale-105 relative ring-2 ring-accent-green/20 from-white/20 to-white/10 border-accent-green/30 shadow-2xl' : ''}
+    lg:backdrop-blur-[14px] lg:backdrop-brightness-[0.91] bg-gradient-to-br rounded-2xl shadow-xl w-full md:flex-1 md:max-w-xs px-5 md:px-7 py-8 flex flex-col transition-all duration-300
+    from-white/20 to-white/10 lg:from-white/10 lg:to-white/5 border border-white/10
+    ${isPopular ? 'md:scale-105 relative ring-2 ring-accent-green/20 from-white/30 to-white/20 lg:from-white/20 lg:to-white/10 border-accent-green/30 shadow-2xl' : ''}
   `;
   const buttonClasses = `
     mt-auto w-full py-3 md:py-2.5 rounded-xl font-semibold text-[14px] transition font-body min-h-[44px]

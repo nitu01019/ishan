@@ -10,13 +10,19 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion"
+// Note: drop-shadow filter animation removed (mobile perf). If ever
+// re-introduced, gate on desktop-only matchMedia + prefers-reduced-motion.
 import { cn } from "@/lib/utils"
 
+// Cards are positioned stacked with scroll-linked transforms. backdrop-blur
+// on every card forced the GPU to re-blur per frame — opaque bg is way cheaper.
+// The shadow was scroll-linked via filter: drop-shadow which repaints; it's now
+// a static box-shadow applied via Tailwind shadow-* classes.
 const cardVariants = cva("absolute will-change-transform", {
   variants: {
     variant: {
-      dark: "flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-white/10 bg-[#111827]/90 p-6 backdrop-blur-md",
-      light: "flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md",
+      dark: "flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-white/10 bg-[#111827] p-6 shadow-2xl",
+      light: "flex size-full flex-col items-center justify-center gap-6 rounded-2xl border border-white/10 bg-[#1f2937] p-6 shadow-2xl",
     },
   },
   defaultVariants: { variant: "dark" },
@@ -101,18 +107,16 @@ export const CardTransformed = React.forwardRef<HTMLDivElement, CardStickyProps>
     const rotate = useTransform(scrollYProgress, rotateRange, [incrementRotation, 0])
     const transform = useMotionTemplate`translateZ(${index * incrementZ}px) translateY(${y}) rotate(${rotate}deg)`
 
-    const dx = useTransform(scrollYProgress, rotateRange, [4, 0])
-    const dy = useTransform(scrollYProgress, rotateRange, [4, 12])
-    const blur = useTransform(scrollYProgress, rotateRange, [2, 24])
-    const alpha = useTransform(scrollYProgress, rotateRange, [0.15, 0.2])
-    const filter = useMotionTemplate`drop-shadow(${dx}px ${dy}px ${blur}px rgba(0,230,118,${alpha}))`
+    // The previous implementation animated `filter: drop-shadow(...)` per frame
+    // with scroll-linked motion values — extremely expensive on mobile and
+    // causes massive jank. A static box-shadow (via class above) looks nearly
+    // identical and stays on the compositor.
 
     const cardStyle = {
       top: index * incrementY,
       transform,
       backfaceVisibility: "hidden" as const,
       zIndex: (arrayLength - index) * incrementZ,
-      filter,
       ...style,
     }
 

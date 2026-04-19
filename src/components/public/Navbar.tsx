@@ -49,7 +49,9 @@ export default function Navbar({
         return "";
       case 'glass':
       default:
-        return "backdrop-blur-xl border-b border-white/10";
+        // Backdrop-blur is a GPU-killer on mobile — only enable it on lg+
+        // viewports; below that fall back to a solid-ish background.
+        return "lg:backdrop-blur-xl border-b border-white/10";
     }
   }
 
@@ -68,7 +70,8 @@ export default function Navbar({
       case 'glass':
       default:
         return {
-          backgroundColor: `rgba(255, 255, 255, ${0.03 * opacityFraction})`,
+          // Opaque-ish fallback for mobile; on lg+ the blur takes over.
+          backgroundColor: `rgba(11, 17, 32, ${0.88 * opacityFraction})`,
           boxShadow: "0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
         };
     }
@@ -136,9 +139,9 @@ export default function Navbar({
         </button>
       </div>
 
-      {/* Mobile Drawer — glass effect */}
+      {/* Mobile Drawer — solid bg (no backdrop-blur: too expensive on mobile GPU). */}
       <div
-        className={`md:hidden backdrop-blur-xl bg-[#0B1120]/90 border-t border-white/10 transition-all duration-300 ${
+        className={`md:hidden bg-[#0B1120] border-t border-white/10 transition-all duration-300 ${
           mobileOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
         }`}
         aria-hidden={!mobileOpen}

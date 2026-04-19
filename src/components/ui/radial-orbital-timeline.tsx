@@ -77,13 +77,76 @@ export default function RadialOrbitalTimeline({
   };
 
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (autoRotate) {
-      timer = setInterval(() => {
-        setRotationAngle((prev) => Number(((prev + 0.3) % 360).toFixed(3)));
-      }, 50);
+    if (!autoRotate) return;
+
+    // Skip rotation loop for users who prefer reduced motion and for touch /
+    // small-screen devices where this component isn't visible anyway.
+    if (typeof window !== "undefined") {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const isSmall = window.matchMedia("(max-width: 1023px)").matches;
+      if (reduced || isSmall) return;
     }
-    return () => { if (timer) clearInterval(timer); };
+
+    let rafId: number | null = null;
+    let lastTs = 0;
+    let isVisible = false;
+    let isTabVisible = !document.hidden;
+    const DEG_PER_SECOND = 6; // matches the previous 0.3deg / 50ms cadence
+
+    const tick = (ts: number) => {
+      if (!isVisible || !isTabVisible) {
+        rafId = null;
+        return;
+      }
+      if (lastTs === 0) lastTs = ts;
+      const dt = (ts - lastTs) / 1000;
+      lastTs = ts;
+      setRotationAngle((prev) => Number(((prev + DEG_PER_SECOND * dt) % 360).toFixed(3)));
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      if (rafId !== null) return;
+      lastTs = 0;
+      rafId = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    const target = containerRef.current;
+    let io: IntersectionObserver | null = null;
+    if (target) {
+      io = new IntersectionObserver(
+        (entries) => {
+          const e = entries[0];
+          isVisible = !!e?.isIntersecting;
+          if (isVisible) start();
+          else stop();
+        },
+        { rootMargin: "100px" }
+      );
+      io.observe(target);
+    } else {
+      isVisible = true;
+      start();
+    }
+
+    const onVis = () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible && isVisible) start();
+      else stop();
+    };
+    document.addEventListener("visibilitychange", onVis);
+
+    return () => {
+      io?.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+      stop();
+    };
   }, [autoRotate]);
 
   const centerViewOnNode = (nodeId: number) => {
@@ -129,11 +192,11 @@ export default function RadialOrbitalTimeline({
           ref={orbitRef}
           style={{ perspective: "1000px", transform: `translate(${centerOffset.x}px, ${centerOffset.y}px)` }}
         >
-          {/* Center orb */}
+          {/* Center orb — one pulse is enough; stacked `animate-ping` rings
+              force the compositor to repaint large areas each frame. */}
           <div className="absolute w-16 h-16 rounded-full bg-gradient-to-br from-accent-green via-accent-teal to-accent-cyan animate-pulse flex items-center justify-center z-10">
-            <div className="absolute w-20 h-20 rounded-full border border-accent-green/20 animate-ping opacity-70" />
-            <div className="absolute w-24 h-24 rounded-full border border-accent-green/10 animate-ping opacity-50" style={{ animationDelay: "0.5s" }} />
-            <div className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md" />
+            <div className="hidden lg:block absolute w-20 h-20 rounded-full border border-accent-green/20 animate-ping opacity-70" />
+            <div className="w-8 h-8 rounded-full bg-white/80" />
           </div>
 
           {/* Orbit ring */}

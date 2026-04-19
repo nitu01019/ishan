@@ -149,7 +149,6 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
       ref={cardRef}
       onContextMenu={handleContextMenu}
       onMouseEnter={handlePointerEnter}
-      onTouchStart={handlePointerEnter}
     >
       <div
         className={`relative overflow-hidden rounded-2xl border border-border-glow
@@ -201,8 +200,10 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
               poster={video.thumbnailUrl}
               className="absolute inset-0 w-full h-full object-cover"
               autoPlay
+              muted
               controls
               playsInline
+              preload="metadata"
               title={video.title}
             />
             <button

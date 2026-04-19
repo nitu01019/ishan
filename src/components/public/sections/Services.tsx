@@ -116,7 +116,7 @@ function IconsGridLayout({ services, background, animations }: Omit<ServicesProp
               initial={item.hidden}
               whileInView={item.visible}
               viewport={{ once: true }}
-              className="flex flex-col items-center text-center rounded-2xl border border-white/10 bg-[#111827]/80 backdrop-blur-md p-4 md:p-6 hover:border-accent-green/30 transition-colors min-h-[44px]"
+              className="flex flex-col items-center text-center rounded-2xl border border-white/10 bg-[#111827] lg:bg-[#111827]/80 lg:backdrop-blur-md p-4 md:p-6 hover:border-accent-green/30 transition-colors min-h-[44px]"
             >
               {/* Icon circle */}
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-accent-green via-accent-teal to-accent-cyan flex items-center justify-center mb-3 md:mb-4">

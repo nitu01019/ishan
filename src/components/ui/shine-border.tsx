@@ -1,5 +1,3 @@
-"use client"
-
 import { cn } from "@/lib/utils"
 
 type TColorProp = string | string[]
@@ -63,10 +61,11 @@ export function ShineBorder({
           zIndex: 50,
         }}
       >
-        {/* Large spinning conic gradient -- clipped by parent mask to border area */}
-        {/* Paused on mobile via prefers-reduced-motion and media query */}
+        {/* Large spinning conic gradient -- clipped by parent mask to border area.
+            Hidden entirely on mobile to avoid the oversized compositing layer
+            (it was only paused before, which still cost layer memory). */}
         <div
-          className="motion-reduce:!hidden md:[animation-play-state:running] [animation-play-state:paused]"
+          className="hidden lg:block motion-reduce:!hidden"
           style={{
             position: "absolute",
             inset: "-200%",

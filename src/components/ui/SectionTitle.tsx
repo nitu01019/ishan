@@ -1,5 +1,3 @@
-"use client";
-
 interface SectionTitleProps {
   readonly text: string;
   readonly highlight: string;

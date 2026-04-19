@@ -36,7 +36,7 @@ const LiquidButton = React.forwardRef<HTMLButtonElement, LiquidButtonProps>(
       <>
         <div className={cn(
           "absolute inset-0 rounded-full",
-          isGreen ? "bg-[#00E676]" : "backdrop-blur-md bg-white/5"
+          isGreen ? "bg-[#00E676]" : "bg-white/10 lg:backdrop-blur-md lg:bg-white/5"
         )} />
         <div className="absolute inset-0 rounded-full" style={{
           boxShadow: isGreen

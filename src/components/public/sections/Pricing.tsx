@@ -195,10 +195,10 @@ function StackedLayout({ plans, background, animations }: Omit<PricingProps, 'la
             initial={item.hidden}
             whileInView={item.visible}
             viewport={{ once: true }}
-            className={`relative rounded-2xl border p-6 md:p-8 backdrop-blur-md transition-all ${
+            className={`relative rounded-2xl border p-6 md:p-8 lg:backdrop-blur-md transition-all ${
               plan.isHighlighted
-                ? "border-accent-green/40 bg-accent-green/5 ring-1 ring-accent-green/20"
-                : "border-white/10 bg-[#111827]/80"
+                ? "border-accent-green/40 bg-accent-green/10 lg:bg-accent-green/5 ring-1 ring-accent-green/20"
+                : "border-white/10 bg-[#111827] lg:bg-[#111827]/80"
             }`}
           >
             {plan.isHighlighted && (

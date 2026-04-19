@@ -80,10 +80,21 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
   const shouldShowSpline = showSpline !== false;
   const [wordIndex, setWordIndex] = useState(0);
   const [shouldLoadSpline, setShouldLoadSpline] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const wordIndexRef = useRef(0);
   const wordsLengthRef = useRef(words.length);
   wordsLengthRef.current = words.length;
   const heroRef = useRef<HTMLElement>(null);
+
+  // Gate everything desktop-only (Spline, rAF polling, pointer forwarding,
+  // glow-pulse). `hidden lg:block` alone still mounts and hydrates.
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -94,11 +105,10 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
     return () => clearInterval(interval);
   }, []);
 
-  // Defer Spline loading until the browser is idle so it doesn't compete with
-  // critical hero content for bandwidth / main-thread time. Falls back to a
-  // 800ms setTimeout for browsers without requestIdleCallback (Safari).
+  // Defer Spline loading until browser is idle AND only on desktop.
+  // Mobile never downloads the 200 KB+ Spline runtime or the 3D scene.
   useEffect(() => {
-    if (!shouldShowSpline) return;
+    if (!shouldShowSpline || !isDesktop) return;
 
     type IdleWindow = Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
@@ -113,7 +123,6 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
 
     if (typeof w.requestIdleCallback === "function") {
       idleHandle = w.requestIdleCallback(trigger, { timeout: 2000 });
-      // Safety fallback in case idle callback is delayed too long.
       timeoutHandle = setTimeout(trigger, 800);
     } else {
       timeoutHandle = setTimeout(trigger, 800);
@@ -127,25 +136,28 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
         clearTimeout(timeoutHandle);
       }
     };
-  }, [shouldShowSpline]);
+  }, [shouldShowSpline, isDesktop]);
 
-  // Forward pointermove events from the whole hero section to the Spline canvas
-  // so the robot tracks the cursor even while hovering over text / overlays
-  // that sit above the absolute full-width canvas.
+  // Forward pointermove events to the Spline canvas (desktop only; touch
+  // devices don't have hover). Bounded retry limit avoids indefinite
+  // requestAnimationFrame loops if the canvas never mounts.
   useEffect(() => {
-    if (!shouldLoadSpline) return;
+    if (!shouldLoadSpline || !isDesktop) return;
     const section = heroRef.current;
     if (!section) return;
     let canvas: HTMLCanvasElement | null = null;
     let disposed = false;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 120; // ~2s at 60fps
 
     const tryAttach = () => {
-      if (disposed) return;
+      if (disposed || attempts >= MAX_ATTEMPTS) return;
       const c = section.querySelector('canvas');
       if (c) {
         canvas = c;
         return;
       }
+      attempts += 1;
       requestAnimationFrame(tryAttach);
     };
     tryAttach();
@@ -166,7 +178,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
       disposed = true;
       section.removeEventListener('pointermove', forward);
     };
-  }, [shouldLoadSpline]);
+  }, [shouldLoadSpline, isDesktop]);
 
   const displayHeadline = headline || "Unleash Your {word} Potential With Pro Video Editing";
   const hasWordPlaceholder = displayHeadline.includes("{word}");
@@ -186,11 +198,11 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
           size={400}
         />
 
-        <div className="absolute inset-0 hero-glow animate-glow-pulse pointer-events-none" />
+        {/* Full-viewport glow-pulse is desktop-only — it's a continuous paint layer the size of the hero. */}
+        <div className="hidden lg:block absolute inset-0 hero-glow animate-glow-pulse pointer-events-none" />
 
-        {/* Spline canvas as full-width absolute overlay (desktop only).
-            Padded on the right so the robot doesn't touch the far edge. */}
-        {shouldShowSpline && (
+        {/* Spline canvas — only mounts on desktop (matchMedia-gated). */}
+        {shouldShowSpline && isDesktop && (
           <div className="hidden lg:block absolute inset-0 z-0 pointer-events-none lg:pr-[3vw]">
             {shouldLoadSpline ? (
               <SplineScene scene={SPLINE_SCENE_URL} className="w-full h-full" />

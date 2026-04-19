@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, Play, X } from "lucide-react";
 import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
@@ -77,8 +78,10 @@ function VideoSlide({ video, index, playingId, onPlay, onStop }: VideoSlideProps
             poster={video.thumbnailUrl}
             className="absolute inset-0 w-full h-full object-cover"
             autoPlay
+            muted
             controls
             playsInline
+            preload="metadata"
             title={video.title}
           />
           <button
@@ -91,14 +94,17 @@ function VideoSlide({ video, index, playingId, onPlay, onStop }: VideoSlideProps
         </>
       ) : (
         <>
-          {/* Thumbnail */}
+          {/* Thumbnail — next/image gives responsive srcset, WebP/AVIF, and proper
+              lazy loading so mobile doesn't fetch 1280x720 images for 180px slots. */}
           {video.thumbnailUrl && (
-            <img
+            <Image
               src={video.thumbnailUrl}
               alt={video.title}
-              className="absolute inset-0 w-full h-full object-cover"
-              loading={index < 3 ? "eager" : "lazy"}
-              decoding={index < 3 ? "sync" : "async"}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 70vw, 800px"
+              priority={index === 0}
+              loading={index === 0 ? undefined : "lazy"}
             />
           )}
 
@@ -261,12 +267,31 @@ function CarouselLayout({ videos, background, animations }: Omit<RecentEditsProp
   const isMobile = useIsMobile(768);
   const { item } = getCardVariants(animations, isMobile);
 
+  // On mobile, autoplay causes constant layout shifts (transform) on a large
+  // carousel of thumbnail slides — a major scroll/FPS killer. We disable it.
+  const plugins = isMobile
+    ? []
+    : [Autoplay({ delay: 4000, stopOnInteraction: true, stopOnMouseEnter: true, stopOnFocusIn: true })];
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: "center" },
-    [Autoplay({ delay: 4000, stopOnInteraction: true, stopOnMouseEnter: true })]
+    plugins
   );
 
   const [playingId, setPlayingId] = useState<string | null>(null);
+
+  // Pause the carousel when the tab is hidden (saves battery & main-thread time).
+  useEffect(() => {
+    if (!emblaApi || isMobile) return;
+    const autoplay = emblaApi.plugins()?.autoplay;
+    if (!autoplay) return;
+    const onVis = () => {
+      if (document.hidden) autoplay.stop();
+      else autoplay.play();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [emblaApi, isMobile]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);

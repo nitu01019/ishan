@@ -23,7 +23,8 @@ interface TestimonialsProps {
 
 function TestimonialCard({ testimonial }: { readonly testimonial: Testimonial }) {
   return (
-    <div className="flex flex-col items-center space-y-4 text-center rounded-2xl border border-white/10 bg-[#111827]/90 p-4 md:p-5 backdrop-blur-md">
+    // backdrop-blur is gated to lg+ — below that we use a solid bg. Much cheaper on mobile GPUs.
+    <div className="flex flex-col items-center space-y-4 text-center rounded-2xl border border-white/10 bg-[#111827] lg:bg-[#111827]/90 lg:backdrop-blur-md p-4 md:p-5">
       <ReviewStars className="text-accent-green" rating={testimonial.rating} />
       <div className="text-sm md:text-base text-white/90 leading-relaxed" style={{ fontSize: "max(14px, 0.875rem)" }}>
         <blockquote>&ldquo;{testimonial.quote}&rdquo;</blockquote>

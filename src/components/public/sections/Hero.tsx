@@ -77,6 +77,7 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
   const words = rotatingWords?.length ? rotatingWords : DEFAULT_WORDS;
   const shouldShowSpline = showSpline !== false;
   const [wordIndex, setWordIndex] = useState(0);
+  const [shouldLoadSpline, setShouldLoadSpline] = useState(false);
   const wordIndexRef = useRef(0);
   const wordsLengthRef = useRef(words.length);
   wordsLengthRef.current = words.length;
@@ -89,6 +90,41 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
     }, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  // Defer Spline loading until the browser is idle so it doesn't compete with
+  // critical hero content for bandwidth / main-thread time. Falls back to a
+  // 800ms setTimeout for browsers without requestIdleCallback (Safari).
+  useEffect(() => {
+    if (!shouldShowSpline) return;
+
+    type IdleWindow = Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    const w = window as IdleWindow;
+
+    let idleHandle: number | null = null;
+    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+
+    const trigger = () => setShouldLoadSpline(true);
+
+    if (typeof w.requestIdleCallback === "function") {
+      idleHandle = w.requestIdleCallback(trigger, { timeout: 2000 });
+      // Safety fallback in case idle callback is delayed too long.
+      timeoutHandle = setTimeout(trigger, 800);
+    } else {
+      timeoutHandle = setTimeout(trigger, 800);
+    }
+
+    return () => {
+      if (idleHandle !== null && typeof w.cancelIdleCallback === "function") {
+        w.cancelIdleCallback(idleHandle);
+      }
+      if (timeoutHandle !== null) {
+        clearTimeout(timeoutHandle);
+      }
+    };
+  }, [shouldShowSpline]);
 
   const displayHeadline = headline || "Unleash Your {word} Potential With Pro Video Editing";
   const hasWordPlaceholder = displayHeadline.includes("{word}");
@@ -207,10 +243,14 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
           {/* Right: 3D Spline scene -- CSS hidden on mobile, visible on lg+ */}
           {shouldShowSpline && (
             <div className="hidden lg:block flex-1 relative">
-              <SplineScene
-                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="w-full h-full"
-              />
+              {shouldLoadSpline ? (
+                <SplineScene
+                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                  className="w-full h-full"
+                />
+              ) : (
+                <SplineLoadingPlaceholder />
+              )}
             </div>
           )}
         </div>

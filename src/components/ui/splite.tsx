@@ -1,7 +1,9 @@
 'use client'
 
-import { Suspense, lazy, useState, useEffect, useCallback, Component } from 'react'
+import { Suspense, lazy, useState, useEffect, useCallback, useRef, Component } from 'react'
 import type { ReactNode } from 'react'
+
+const RETRY_DELAY_MS = 500
 
 const Spline = lazy(() => import('@splinetool/react-spline'))
 
@@ -58,15 +60,14 @@ class SplineErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
       clearTimeout(this.retryTimerId)
       this.retryTimerId = null
     }
-    // The parent's onError returns an optional cleanup function from its
-    // setTimeout; we don't receive that handle here, so we schedule our own
-    // backoff tracker that mirrors the 2s delay used by the parent hook and
-    // ensures cleanup on unmount. The parent's internal timer is also cleared
-    // by React's cleanup, but storing one here prevents setState-on-unmounted
-    // warnings during the backoff window if this boundary unmounts mid-retry.
+    // Warn on retry attempt so operators can see failure cadence in dev tools.
+    console.warn('[SplineErrorBoundary] render error caught; scheduling retry')
+    // Schedule a local backoff tracker mirroring the parent's retry delay so
+    // componentWillUnmount can cancel any in-flight timer and avoid
+    // setState-on-unmounted warnings during the backoff window.
     this.retryTimerId = setTimeout(() => {
       this.retryTimerId = null
-    }, 2000)
+    }, RETRY_DELAY_MS)
     this.props.onError?.()
   }
 
@@ -94,15 +95,22 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
   const [retryKey, setRetryKey] = useState(0)
   const [retries, setRetries] = useState(0)
   const [loaded, setLoaded] = useState(false)
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const maxRetries = 2
 
   const handleError = useCallback(() => {
     if (retries < maxRetries) {
-      const timer = setTimeout(() => {
+      if (retryTimerRef.current !== null) {
+        clearTimeout(retryTimerRef.current)
+      }
+      console.warn(
+        `[SplineScene] retry ${retries + 1}/${maxRetries} scheduled in ${RETRY_DELAY_MS}ms`,
+      )
+      retryTimerRef.current = setTimeout(() => {
+        retryTimerRef.current = null
         setRetries((r) => r + 1)
         setRetryKey((k) => k + 1)
-      }, 2000)
-      return () => clearTimeout(timer)
+      }, RETRY_DELAY_MS)
     }
   }, [retries])
 
@@ -111,6 +119,15 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
     setRetryKey(0)
     setLoaded(false)
   }, [scene])
+
+  useEffect(() => {
+    return () => {
+      if (retryTimerRef.current !== null) {
+        clearTimeout(retryTimerRef.current)
+        retryTimerRef.current = null
+      }
+    }
+  }, [])
 
   const handleLoad = useCallback(() => {
     setLoaded(true)

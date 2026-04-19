@@ -40,12 +40,12 @@ const nextConfig = {
             key: "Strict-Transport-Security",
             value: "max-age=31536000; includeSubDomains",
           },
-          // CSP: wildcard *.spline.design for runtime + unpkg.com because @splinetool/runtime fetches @splinetool/modelling-wasm from unpkg at load time. wasm-unsafe-eval needed for Rapier physics.
+          // CSP: Spline runtime needs 'unsafe-eval' (uses new Function()/eval) + wasm-unsafe-eval for Rapier physics WASM. connect-src: wildcard *.spline.design + unpkg.com (modelling-wasm is fetched from unpkg at load time).
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https: http:",
               "font-src 'self' https://fonts.gstatic.com",

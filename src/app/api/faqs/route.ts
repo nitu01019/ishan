@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 
 import { getFAQs, createItem } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
+import { faqCreateSchema } from "@/lib/validation/admin-schemas";
 import type { ApiResponse, FAQ } from "@/types";
 
 export const runtime = 'nodejs';
@@ -16,9 +17,9 @@ export async function GET(): Promise<NextResponse<ApiResponse<FAQ[]>>> {
     const faqs = await getFAQs(includeHidden);
 
     return NextResponse.json({ success: true, data: faqs });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to fetch FAQs";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  } catch (err: unknown) {
+    console.error(err);
+    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
 }
 
@@ -30,28 +31,24 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<{
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json() as Record<string, unknown>;
-
-    if (!body.question || typeof body.question !== "string") {
-      return NextResponse.json({ success: false, error: "Question is required" }, { status: 400 });
-    }
-    if (!body.answer || typeof body.answer !== "string") {
-      return NextResponse.json({ success: false, error: "Answer is required" }, { status: 400 });
+    const parsed = faqCreateSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
     }
 
     const dataWithDefaults = {
-      ...body,
-      isVisible: body.isVisible ?? true,
-      createdAt: body.createdAt ?? new Date().toISOString(),
-      order: body.order ?? 0,
+      ...parsed.data,
+      isVisible: parsed.data.isVisible ?? true,
+      createdAt: parsed.data.createdAt ?? new Date().toISOString(),
+      order: parsed.data.order ?? 0,
     };
 
     const id = await createItem("faqs", dataWithDefaults);
     revalidatePath("/");
 
     return NextResponse.json({ success: true, data: { id } }, { status: 201 });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to create FAQ";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  } catch (err: unknown) {
+    console.error(err);
+    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -13,10 +13,15 @@ export default function AdminLoginPage() {
   const disableTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     async function fetchPortfolioName() {
       try {
-        const res = await fetch('/api/site-config');
+        const res = await fetch('/api/site-config', { signal });
+        if (signal.aborted) return;
         const json = await res.json();
+        if (signal.aborted) return;
         const config = json.data;
         if (config) {
           const name =
@@ -26,15 +31,17 @@ export default function AdminLoginPage() {
             "Neal's Portfolio";
           setPortfolioName(name);
         }
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
         // Keep default on error
       }
     }
 
     fetchPortfolioName();
 
-    // Cleanup the disable timer on unmount.
+    // Cleanup the disable timer and in-flight fetch on unmount.
     return () => {
+      controller.abort();
       if (disableTimerRef.current !== null) {
         clearTimeout(disableTimerRef.current);
       }

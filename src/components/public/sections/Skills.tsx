@@ -76,12 +76,12 @@ function StaticRow({ items }: { readonly items: readonly string[] }) {
 }
 
 export default function Skills({ skills, background, animations }: SkillsProps) {
-  if (skills.length === 0) return null;
-
   const isMobile = useIsMobile();
   const { item } = getCardVariants(animations);
   const scrollSpeed = getScrollSpeed(animations);
   const scrollEnabled = animations?.scrollAnimations !== false;
+
+  if (skills.length === 0) return null;
 
   // On mobile, cap items per marquee row to reduce paint cost
   const mobileRowLimit = 6;

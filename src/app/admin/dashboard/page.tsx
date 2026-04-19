@@ -59,7 +59,7 @@ const INITIAL_STATE: DashboardState = {
 const QUICK_ACTIONS: readonly QuickAction[] = [
   { label: 'Add Video', href: '/admin/dashboard/videos?action=add', icon: Plus },
   { label: 'View Inquiries', href: '/admin/dashboard/inquiries', icon: Inbox },
-  { label: 'Edit Theme', href: '/admin/dashboard/settings', icon: Palette },
+  { label: 'Edit Theme', href: '/admin/dashboard/theme', icon: Palette },
   { label: 'Site Settings', href: '/admin/dashboard/settings', icon: Settings },
 ] as const;
 
@@ -67,15 +67,15 @@ const QUICK_ACTIONS: readonly QuickAction[] = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function fetchCount(url: string): Promise<number> {
-  const res = await fetch(url);
+async function fetchCount(url: string, signal?: AbortSignal): Promise<number> {
+  const res = await fetch(url, signal ? { signal } : undefined);
   const json = await res.json();
   const data = json.data;
   return Array.isArray(data) ? data.length : 0;
 }
 
-async function fetchUnreadCount(url: string): Promise<number> {
-  const res = await fetch(url);
+async function fetchUnreadCount(url: string, signal?: AbortSignal): Promise<number> {
+  const res = await fetch(url, signal ? { signal } : undefined);
   const json = await res.json();
   const data = json.data;
   if (!Array.isArray(data)) return 0;
@@ -84,15 +84,16 @@ async function fetchUnreadCount(url: string): Promise<number> {
   ).length;
 }
 
-async function checkDatabase(): Promise<DatabaseStatus> {
+async function checkDatabase(signal?: AbortSignal): Promise<DatabaseStatus> {
   try {
-    const res = await fetch('/api/site-config');
+    const res = await fetch('/api/site-config', signal ? { signal } : undefined);
     const json = await res.json();
     if (json.success && json.data) {
       return 'connected';
     }
     return 'not-configured';
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') return 'checking';
     return 'error';
   }
 }
@@ -202,15 +203,20 @@ export default function DashboardPage() {
   const [portfolioName, setPortfolioName] = useState("Neal");
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     async function loadStats() {
       const [videos, testimonials, unread, plans, database] =
         await Promise.allSettled([
-          fetchCount('/api/videos'),
-          fetchCount('/api/testimonials'),
-          fetchUnreadCount('/api/inquiries'),
-          fetchCount('/api/pricing'),
-          checkDatabase(),
+          fetchCount('/api/videos', signal),
+          fetchCount('/api/testimonials', signal),
+          fetchUnreadCount('/api/inquiries', signal),
+          fetchCount('/api/pricing', signal),
+          checkDatabase(signal),
         ]);
+
+      if (signal.aborted) return;
 
       setState({
         totalVideos:
@@ -231,8 +237,10 @@ export default function DashboardPage() {
 
     async function fetchPortfolioName() {
       try {
-        const res = await fetch('/api/site-config');
+        const res = await fetch('/api/site-config', { signal });
+        if (signal.aborted) return;
         const json = await res.json();
+        if (signal.aborted) return;
         const config = json.data;
         if (config) {
           const name =
@@ -242,13 +250,16 @@ export default function DashboardPage() {
             "Neal";
           setPortfolioName(name);
         }
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
         // Keep default on error
       }
     }
 
     loadStats();
     fetchPortfolioName();
+
+    return () => controller.abort();
   }, []);
 
   const statCards: readonly StatCard[] = [

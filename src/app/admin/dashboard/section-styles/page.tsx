@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import BackgroundEditor from '@/components/admin/BackgroundEditor';
 import { getSectionStyle } from '@/lib/section-style';
+import { useDirtyState } from '@/lib/hooks/useDirtyState';
 
 interface BackgroundValue {
   readonly type: 'solid' | 'gradient' | 'image';
@@ -52,8 +53,8 @@ function buildDefaultBackgrounds(): Record<string, BackgroundValue> {
 }
 
 export default function SectionStylesPage() {
-  const [backgrounds, setBackgrounds] = useState<Record<string, BackgroundValue>>(
-    buildDefaultBackgrounds,
+  const { value: backgrounds, setValue: setBackgrounds, markClean } = useDirtyState<Record<string, BackgroundValue>>(
+    buildDefaultBackgrounds(),
   );
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -128,6 +129,7 @@ export default function SectionStylesPage() {
         throw new Error('Failed to save section styles.');
       }
 
+      markClean();
       setSuccess('Section styles saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch {

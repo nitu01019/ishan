@@ -48,9 +48,9 @@ function signPayload(payload: string, secret: string): string {
 }
 
 export async function createSession(userAgent: string): Promise<void> {
-  const secret = process.env.SESSION_SECRET ?? process.env.ADMIN_PASSWORD;
-  if (!secret) {
-    throw new Error("SESSION_SECRET environment variable is not configured");
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("SESSION_SECRET must be set and >= 32 chars");
   }
 
   const timestamp = Date.now().toString();
@@ -76,9 +76,9 @@ export async function destroySession(): Promise<void> {
 }
 
 export async function isAuthenticated(userAgent: string): Promise<boolean> {
-  const secret = process.env.SESSION_SECRET ?? process.env.ADMIN_PASSWORD;
-  if (!secret) {
-    return false;
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("SESSION_SECRET must be set and >= 32 chars");
   }
 
   const cookieStore = await cookies();

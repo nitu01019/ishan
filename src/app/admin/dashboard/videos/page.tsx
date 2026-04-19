@@ -215,20 +215,27 @@ export default function VideosPage() {
   // Data fetching
   // ---------------------------------------------------------------------------
 
-  async function fetchVideos(): Promise<void> {
+  async function fetchVideos(signal?: AbortSignal): Promise<void> {
     try {
-      const res = await fetch('/api/videos');
+      const res = await fetch('/api/videos', signal ? { signal } : undefined);
+      if (signal?.aborted) return;
       const data = await res.json();
+      if (signal?.aborted) return;
       setVideos(data.data ?? []);
-    } catch {
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       setError('Failed to load videos.');
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    fetchVideos();
+    const controller = new AbortController();
+    fetchVideos(controller.signal);
+    return () => controller.abort();
   }, []);
 
   // ---------------------------------------------------------------------------

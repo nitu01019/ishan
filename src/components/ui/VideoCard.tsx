@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import { Play, Volume2, Lock, X } from "lucide-react";
 import { formatDuration } from "@/lib/format-duration";
 import { useIsMobile } from "@/lib/hooks";
@@ -220,14 +221,20 @@ export default function VideoCard({ video, variant, showSound = false, onPlay }:
                 {!imageLoaded && !imageError && (
                   <div className="absolute inset-0 bg-gradient-to-br from-bg-card via-bg-card-alt to-bg-card animate-pulse" />
                 )}
-                <img
+                <Image
                   src={video.thumbnailUrl}
                   alt={video.title}
+                  width={isPortrait ? 720 : 1280}
+                  height={isPortrait ? 1280 : 720}
+                  sizes={
+                    isPortrait
+                      ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      : "(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                  }
                   className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:scale-105 ${
                     imageLoaded ? "opacity-100" : "opacity-0"
                   }`}
                   loading="lazy"
-                  decoding="async"
                   draggable={false}
                   onLoad={() => setImageLoaded(true)}
                   onError={() => setImageError(true)}

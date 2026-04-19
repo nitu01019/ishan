@@ -33,20 +33,27 @@ export default function FAQsPage() {
   const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  async function fetchFAQs() {
+  async function fetchFAQs(signal?: AbortSignal) {
     try {
-      const res = await fetch('/api/faqs');
+      const res = await fetch('/api/faqs', signal ? { signal } : undefined);
+      if (signal?.aborted) return;
       const data = await res.json();
+      if (signal?.aborted) return;
       setFaqs(data.data ?? []);
-    } catch {
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       setError('Failed to load FAQs.');
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    fetchFAQs();
+    const controller = new AbortController();
+    fetchFAQs(controller.signal);
+    return () => controller.abort();
   }, []);
 
   function handleEdit(faq: FAQ) {

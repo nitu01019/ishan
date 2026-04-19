@@ -7,10 +7,5 @@ export const isSupabaseConfigured: boolean =
   supabaseUrl.length > 0 && supabaseAnonKey.length > 0;
 
 export const supabase: SupabaseClient | null = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        fetch: (input, init) =>
-          fetch(input, { ...init, cache: "no-store" }),
-      },
-    })
+  ? createClient(supabaseUrl, supabaseAnonKey)
   : null;

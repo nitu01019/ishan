@@ -12,9 +12,27 @@ export const runtime = 'nodejs';
 
 /**
  * Extract the client IP from standard proxy headers with a safe fallback.
+ *
+ * Preference order (most trustworthy first for our Netlify deployment):
+ *   1. `x-nf-client-connection-ip` — Netlify's direct connection IP, not
+ *      spoofable by clients because Netlify strips incoming copies.
+ *   2. `x-real-ip` — typically set by the edge/proxy to the true client IP.
+ *   3. `x-forwarded-for` — first entry is the original client in the chain.
  */
 function getClientIp(request: Request): string {
   const headers = new Headers(request.headers);
+
+  const netlifyIp = headers.get("x-nf-client-connection-ip");
+  if (netlifyIp) {
+    const trimmed = netlifyIp.trim();
+    if (trimmed) return trimmed;
+  }
+
+  const realIp = headers.get("x-real-ip");
+  if (realIp) {
+    const trimmed = realIp.trim();
+    if (trimmed) return trimmed;
+  }
 
   const forwarded = headers.get("x-forwarded-for");
   if (forwarded) {
@@ -22,9 +40,6 @@ function getClientIp(request: Request): string {
     const first = forwarded.split(",")[0]?.trim();
     if (first) return first;
   }
-
-  const realIp = headers.get("x-real-ip");
-  if (realIp) return realIp.trim();
 
   return "127.0.0.1";
 }
@@ -42,7 +57,7 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<n
     const ip = getClientIp(request);
 
     // --- Rate-limit check (before any password work) ---
-    const limit = checkRateLimit(ip);
+    const limit = await checkRateLimit(ip);
     if (!limit.allowed) {
       return NextResponse.json(
         { success: false, error: "Too many attempts. Please try again later." },
@@ -59,7 +74,7 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<n
     if (body.website) {
       // Behave exactly like a wrong-password response so bots learn nothing.
       await randomDelay(500, 1500);
-      recordFailedAttempt(ip);
+      await recordFailedAttempt(ip);
       return NextResponse.json(
         { success: false, error: "Invalid credentials" },
         { status: 401 },
@@ -76,7 +91,7 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<n
     const isValid = await validatePassword(body.password);
 
     if (!isValid) {
-      recordFailedAttempt(ip);
+      await recordFailedAttempt(ip);
       // Random delay to slow timing attacks and automated scripts.
       await randomDelay(500, 1500);
       return NextResponse.json(
@@ -86,7 +101,7 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<n
     }
 
     // Successful login: clear the failure counter for this IP.
-    resetAttempts(ip);
+    await resetAttempts(ip);
 
     const userAgent = request.headers.get("user-agent") || "";
     await createSession(userAgent);

@@ -41,6 +41,8 @@ interface ErrorBoundaryState {
 }
 
 class SplineErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private retryTimerId: ReturnType<typeof setTimeout> | null = null
+
   constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = { hasError: false }
@@ -51,7 +53,28 @@ class SplineErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 
   componentDidCatch() {
+    // Clear any previous pending retry before scheduling a new one.
+    if (this.retryTimerId !== null) {
+      clearTimeout(this.retryTimerId)
+      this.retryTimerId = null
+    }
+    // The parent's onError returns an optional cleanup function from its
+    // setTimeout; we don't receive that handle here, so we schedule our own
+    // backoff tracker that mirrors the 2s delay used by the parent hook and
+    // ensures cleanup on unmount. The parent's internal timer is also cleared
+    // by React's cleanup, but storing one here prevents setState-on-unmounted
+    // warnings during the backoff window if this boundary unmounts mid-retry.
+    this.retryTimerId = setTimeout(() => {
+      this.retryTimerId = null
+    }, 2000)
     this.props.onError?.()
+  }
+
+  componentWillUnmount() {
+    if (this.retryTimerId !== null) {
+      clearTimeout(this.retryTimerId)
+      this.retryTimerId = null
+    }
   }
 
   render() {

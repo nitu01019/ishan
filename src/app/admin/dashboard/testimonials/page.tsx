@@ -116,20 +116,27 @@ export default function TestimonialsPage() {
     }
   }
 
-  async function fetchTestimonials() {
+  async function fetchTestimonials(signal?: AbortSignal) {
     try {
-      const res = await fetch('/api/testimonials');
+      const res = await fetch('/api/testimonials', signal ? { signal } : undefined);
+      if (signal?.aborted) return;
       const data = await res.json();
+      if (signal?.aborted) return;
       setTestimonials(data.data ?? []);
-    } catch {
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       setError('Failed to load testimonials.');
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    fetchTestimonials();
+    const controller = new AbortController();
+    fetchTestimonials(controller.signal);
+    return () => controller.abort();
   }, []);
 
   function handleEdit(testimonial: Testimonial) {

@@ -16,9 +16,9 @@ import {
   ContactSkeleton,
 } from "@/components/ui/SectionSkeletons";
 
-// Force dynamic rendering so the public page always shows the latest data.
-// Portfolio sites have low traffic, so the cost of skipping the cache is negligible.
-export const dynamic = "force-dynamic";
+// Revalidate the public page every 60 seconds so content updates propagate
+// without forcing a full dynamic render on every request.
+export const revalidate = 60;
 
 // Lazy load all content sections with skeleton fallbacks
 const RecentEdits = nextDynamic(() => import("@/components/public/sections/RecentEdits"), {

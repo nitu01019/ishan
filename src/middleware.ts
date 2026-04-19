@@ -64,9 +64,9 @@ function parseToken(token: string): TokenParts | null {
 }
 
 async function verifyToken(token: string): Promise<boolean> {
-  const secret = process.env.SESSION_SECRET ?? process.env.ADMIN_PASSWORD;
-  if (!secret) {
-    return false;
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("SESSION_SECRET must be set and >= 32 chars");
   }
 
   const parts = parseToken(token);
@@ -104,25 +104,32 @@ async function verifyToken(token: string): Promise<boolean> {
 
 // Routes explicitly exempt from auth — must be an allowlist, not a blanket rule.
 // Any route not listed here that starts with /api/ requires a valid session token.
+const PUBLIC_GET_ROUTES: ReadonlySet<string> = new Set([
+  "/api/videos",
+  "/api/testimonials",
+  "/api/services",
+  "/api/pricing",
+  "/api/faqs",
+  "/api/site-config",
+  "/api/youtube-meta",
+]);
+
 function isAuthExemptRoute(pathname: string, method: string): boolean {
+  // Fast path: GET on exact public route — O(1) Set lookup before anything else.
+  if (method === "GET" && PUBLIC_GET_ROUTES.has(pathname)) {
+    return true;
+  }
+
   // Auth endpoints handle their own flows; never block them here.
   if (pathname.startsWith("/api/auth/")) {
     return true;
   }
 
-  // Public read-only content routes (portfolio data visible to all visitors).
-  const publicGetRoutes = [
-    "/api/videos",
-    "/api/testimonials",
-    "/api/services",
-    "/api/pricing",
-    "/api/faqs",
-    "/api/site-config",
-    "/api/youtube-meta",
-  ];
+  // Public read-only content with trailing segment (e.g. /api/videos/123).
   if (method === "GET") {
-    for (const route of publicGetRoutes) {
-      if (pathname === route || pathname.startsWith(route + "/")) {
+    const routes = Array.from(PUBLIC_GET_ROUTES);
+    for (let i = 0; i < routes.length; i++) {
+      if (pathname.startsWith(routes[i] + "/")) {
         return true;
       }
     }

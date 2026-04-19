@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -77,13 +77,18 @@ export default function Hero({ headline, subtitle, ctaText, socialProofText, rob
   const words = rotatingWords?.length ? rotatingWords : DEFAULT_WORDS;
   const shouldShowSpline = showSpline !== false;
   const [wordIndex, setWordIndex] = useState(0);
+  const wordIndexRef = useRef(0);
+  const wordsLengthRef = useRef(words.length);
+  wordsLengthRef.current = words.length;
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setWordIndex((prev) => (prev + 1) % words.length);
+    const interval = setInterval(() => {
+      const next = (wordIndexRef.current + 1) % wordsLengthRef.current;
+      wordIndexRef.current = next;
+      setWordIndex(next);
     }, 2000);
-    return () => clearTimeout(timeout);
-  }, [wordIndex, words.length]);
+    return () => clearInterval(interval);
+  }, []);
 
   const displayHeadline = headline || "Unleash Your {word} Potential With Pro Video Editing";
   const hasWordPlaceholder = displayHeadline.includes("{word}");

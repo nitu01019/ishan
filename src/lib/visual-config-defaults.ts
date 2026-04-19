@@ -12,7 +12,7 @@ import type {
 /**
  * Default section background -- transparent solid, no visual change.
  */
-export const defaultSectionBackground: SectionBackground = {
+const defaultSectionBackground: SectionBackground = {
   type: "solid",
   color: "#0B1120",
   gradientFrom: "#0B1120",
@@ -57,7 +57,7 @@ export const defaultNavConfig: NavConfig = {
 /**
  * Default typography config -- matches Playfair Display + Inter from layout.tsx.
  */
-export const defaultTypographyConfig: TypographyConfig = {
+const defaultTypographyConfig: TypographyConfig = {
   headingFont: "Playfair Display",
   bodyFont: "Inter",
   baseFontSize: 16,
@@ -83,7 +83,7 @@ export const defaultHeroConfig: HeroConfig = {
 /**
  * Default preloader config -- matches the current Preloader component.
  */
-export const defaultPreloaderConfig: PreloaderConfig = {
+const defaultPreloaderConfig: PreloaderConfig = {
   enabled: true,
   portfolioName: "Neal's portfolio",
   loadingMessage: "Getting Neal's portfolio for you",
@@ -92,7 +92,7 @@ export const defaultPreloaderConfig: PreloaderConfig = {
 /**
  * Default section backgrounds -- all use the base transparent solid.
  */
-export const defaultSectionBackgrounds: NonNullable<SiteConfig["sectionBackgrounds"]> = {
+const defaultSectionBackgrounds: NonNullable<SiteConfig["sectionBackgrounds"]> = {
   hero: { ...defaultSectionBackground },
   videos: { ...defaultSectionBackground },
   testimonials: { ...defaultSectionBackground },
@@ -109,7 +109,7 @@ export const defaultSectionBackgrounds: NonNullable<SiteConfig["sectionBackgroun
  * Merging these into any partial SiteConfig ensures components
  * always have complete values without breaking existing data.
  */
-export const visualConfigDefaults = {
+const visualConfigDefaults = {
   navbar: defaultNavConfig,
   typography: defaultTypographyConfig,
   layouts: defaultLayoutConfig,

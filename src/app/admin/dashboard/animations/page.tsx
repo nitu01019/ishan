@@ -5,6 +5,7 @@ import { motion, type TargetAndTransition } from 'framer-motion';
 import type { AnimationConfig } from '@/types';
 import { defaultAnimationConfig } from '@/lib/visual-config-defaults';
 import SelectControl from '@/components/admin/SelectControl';
+import { useDirtyState } from '@/lib/hooks/useDirtyState';
 
 const CARD_ENTRANCE_OPTIONS = [
   { value: 'fade-up', label: 'Fade Up' },
@@ -151,7 +152,7 @@ function PreviewPanel({
  * -------------------------------------------------------------------------*/
 
 export default function AnimationsPage() {
-  const [animations, setAnimations] = useState<AnimationConfig>({
+  const { value: animations, setValue: setAnimations, markClean } = useDirtyState<AnimationConfig>({
     ...defaultAnimationConfig,
   });
   const [loading, setLoading] = useState(true);
@@ -234,6 +235,7 @@ export default function AnimationsPage() {
         throw new Error('Failed to save animations.');
       }
 
+      markClean();
       setSuccess('Animations saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch {

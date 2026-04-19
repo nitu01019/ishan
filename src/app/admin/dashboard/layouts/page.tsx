@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { LayoutConfig } from '@/types';
 import { defaultLayoutConfig } from '@/lib/visual-config-defaults';
+import { useDirtyState } from '@/lib/hooks/useDirtyState';
 
 /* ------------------------------------------------------------------ */
 /*  Wireframe Preview Components                                       */
@@ -272,7 +273,7 @@ const VIDEOS_OPTIONS: readonly LayoutOption[] = [
 /* ------------------------------------------------------------------ */
 
 export default function LayoutsPage() {
-  const [layouts, setLayouts] = useState<LayoutConfig>({ ...defaultLayoutConfig });
+  const { value: layouts, setValue: setLayouts, markClean } = useDirtyState<LayoutConfig>({ ...defaultLayoutConfig });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -332,6 +333,7 @@ export default function LayoutsPage() {
         throw new Error('Failed to save layouts.');
       }
 
+      markClean();
       setSuccess('Layouts saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch {

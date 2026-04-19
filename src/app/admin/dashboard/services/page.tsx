@@ -33,20 +33,27 @@ export default function ServicesPage() {
   const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  async function fetchServices() {
+  async function fetchServices(signal?: AbortSignal) {
     try {
-      const res = await fetch('/api/services');
+      const res = await fetch('/api/services', signal ? { signal } : undefined);
+      if (signal?.aborted) return;
       const data = await res.json();
+      if (signal?.aborted) return;
       setServices(data.data ?? []);
-    } catch {
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       setError('Failed to load services.');
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    fetchServices();
+    const controller = new AbortController();
+    fetchServices(controller.signal);
+    return () => controller.abort();
   }, []);
 
   function handleEdit(service: Service) {

@@ -95,30 +95,40 @@ export default function ThemeProvider({
     }
 
     // If no initialTheme was provided server-side, fetch from API as fallback
-    if (!initialTheme) {
-      const loadTheme = async () => {
-        try {
-          const res = await fetch("/api/site-config");
-          if (!res.ok) return;
-          const data = await res.json();
-          const theme = data.data?.theme ?? data.theme;
-          if (theme) {
-            applyTheme(theme);
-          }
-          const typo = data.data?.typography ?? data.typography;
-          if (typo) {
-            applyTypography(typo);
-          }
-          const nav = data.data?.navbar ?? data.navbar;
-          if (nav) {
-            applyNavConfig(nav);
-          }
-        } catch {
-          // Silently fail — CSS defaults will apply
-        }
-      };
-      loadTheme();
+    if (initialTheme) {
+      return;
     }
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const loadTheme = async () => {
+      try {
+        const res = await fetch("/api/site-config", { signal });
+        if (signal.aborted) return;
+        if (!res.ok) return;
+        const data = await res.json();
+        if (signal.aborted) return;
+        const theme = data.data?.theme ?? data.theme;
+        if (theme) {
+          applyTheme(theme);
+        }
+        const typo = data.data?.typography ?? data.typography;
+        if (typo) {
+          applyTypography(typo);
+        }
+        const nav = data.data?.navbar ?? data.navbar;
+        if (nav) {
+          applyNavConfig(nav);
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        // Silently fail — CSS defaults will apply
+      }
+    };
+    loadTheme();
+
+    return () => controller.abort();
   }, [initialTheme, typography, navConfig]);
 
   return <>{children}</>;

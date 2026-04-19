@@ -42,20 +42,27 @@ export default function PricingPage() {
   const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  async function fetchPlans() {
+  async function fetchPlans(signal?: AbortSignal) {
     try {
-      const res = await fetch('/api/pricing');
+      const res = await fetch('/api/pricing', signal ? { signal } : undefined);
+      if (signal?.aborted) return;
       const data = await res.json();
+      if (signal?.aborted) return;
       setPlans(data.data ?? []);
-    } catch {
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       setError('Failed to load pricing plans.');
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    fetchPlans();
+    const controller = new AbortController();
+    fetchPlans(controller.signal);
+    return () => controller.abort();
   }, []);
 
   function handleEdit(plan: PricingPlan) {

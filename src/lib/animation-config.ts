@@ -91,28 +91,6 @@ export function getCardVariants(config?: AnimationConfig, isMobile = false) {
   return { container, item };
 }
 
-export function getButtonHoverProps(config?: AnimationConfig) {
-  const hover = config?.buttonHover ?? "glow";
-  switch (hover) {
-    case "lift":
-      return { whileHover: { y: -4, transition: { duration: 0.2 } } };
-    case "pulse":
-      return {
-        whileHover: {
-          scale: [1, 1.05, 1],
-          transition: { repeat: Infinity, duration: 0.8 },
-        },
-      };
-    case "none":
-      return {};
-    case "glow":
-    default:
-      return {
-        whileHover: { scale: 1.02, transition: { duration: 0.2 } },
-      };
-  }
-}
-
 export function getScrollSpeed(config?: AnimationConfig): number {
   const speed = config?.scrollSpeed ?? "medium";
   switch (speed) {

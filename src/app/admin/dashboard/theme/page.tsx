@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ThemeConfig, TypographyConfig, PreloaderConfig } from '@/types';
 import SliderControl from '@/components/admin/SliderControl';
 import SelectControl from '@/components/admin/SelectControl';
+import { useDirtyState } from '@/lib/hooks/useDirtyState';
 
 interface ColorField {
   readonly key: keyof ThemeConfig;
@@ -335,9 +336,9 @@ function LivePreviewPanel({
 }
 
 export default function ThemePage() {
-  const [theme, setTheme] = useState<ThemeConfig>({ ...DEFAULT_THEME });
-  const [typography, setTypography] = useState<TypographyConfig>({ ...DEFAULT_TYPOGRAPHY });
-  const [preloader, setPreloader] = useState<PreloaderConfig>({ ...DEFAULT_PRELOADER });
+  const { value: theme, setValue: setTheme, markClean: markThemeClean } = useDirtyState<ThemeConfig>({ ...DEFAULT_THEME });
+  const { value: typography, setValue: setTypography, markClean: markTypographyClean } = useDirtyState<TypographyConfig>({ ...DEFAULT_TYPOGRAPHY });
+  const { value: preloader, setValue: setPreloader, markClean: markPreloaderClean } = useDirtyState<PreloaderConfig>({ ...DEFAULT_PRELOADER });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -449,6 +450,9 @@ export default function ThemePage() {
 
       applyCssVariables(theme);
       applyTypographyCssVariables(typography);
+      markThemeClean();
+      markTypographyClean();
+      markPreloaderClean();
       setSuccess('Theme saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch {

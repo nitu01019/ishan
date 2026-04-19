@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { supabase, isSupabaseConfigured } from "./supabase";
 import seedData from "@/data/seed.json";
 import { getVisualDefaults } from "./visual-config-defaults";
@@ -118,7 +119,7 @@ export async function getFAQs(includeHidden = false): Promise<FAQ[]> {
   return sortByOrder(filtered);
 }
 
-export async function getSiteConfig(): Promise<SiteConfig> {
+export const getSiteConfig = cache(async (): Promise<SiteConfig> => {
   let raw: SiteConfig;
 
   if (isSupabaseConfigured && supabase) {
@@ -194,7 +195,7 @@ export async function getSiteConfig(): Promise<SiteConfig> {
         }
       : defaults.sectionBackgrounds,
   };
-}
+});
 
 const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 

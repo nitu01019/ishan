@@ -21,6 +21,99 @@ const DEFAULTS: Required<CompressOptions> = {
   quality: 0.85,
 };
 
+// Minimal bitmap-like shape that both ImageBitmap and HTMLImageElement satisfy
+// when used as a drawImage source. Both expose width/height, and both are valid
+// CanvasImageSource values.
+interface DrawableBitmap {
+  readonly width: number;
+  readonly height: number;
+  close?: () => void;
+}
+
+function hasOffscreenCanvas(): boolean {
+  return typeof OffscreenCanvas !== 'undefined';
+}
+
+function hasCreateImageBitmap(): boolean {
+  return typeof createImageBitmap === 'function';
+}
+
+/**
+ * Decode a File into a drawable bitmap, preferring createImageBitmap with
+ * EXIF-aware orientation when available, falling back to an HTMLImageElement
+ * with img.decode() otherwise.
+ */
+async function decodeImage(file: File): Promise<DrawableBitmap> {
+  if (hasCreateImageBitmap()) {
+    // Honor EXIF orientation so rotated photos display correctly.
+    return await createImageBitmap(file, { imageOrientation: 'from-image' });
+  }
+
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = url;
+    if (typeof img.decode === 'function') {
+      await img.decode();
+    } else {
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Failed to load image'));
+      });
+    }
+    const width = img.naturalWidth || img.width;
+    const height = img.naturalHeight || img.height;
+    return {
+      width,
+      height,
+      close: () => URL.revokeObjectURL(url),
+      // Attach the underlying element so drawImage can use it.
+      // We cast on use since the structural interface above is enough for sizing.
+      ...({ _element: img } as Record<string, unknown>),
+    } as DrawableBitmap & { readonly _element: HTMLImageElement };
+  } catch (err) {
+    URL.revokeObjectURL(url);
+    throw err;
+  }
+}
+
+interface CanvasLike {
+  readonly width: number;
+  readonly height: number;
+  drawImage(source: CanvasImageSource, dx: number, dy: number, dw: number, dh: number): void;
+  toBlob(type: string, quality: number): Promise<Blob | null>;
+}
+
+function createCanvas(width: number, height: number): CanvasLike | null {
+  if (hasOffscreenCanvas()) {
+    const off = new OffscreenCanvas(width, height);
+    const ctx = off.getContext('2d');
+    if (!ctx) return null;
+    return {
+      width,
+      height,
+      drawImage: (source, dx, dy, dw, dh) => ctx.drawImage(source, dx, dy, dw, dh),
+      toBlob: (type, quality) => off.convertToBlob({ type, quality }),
+    };
+  }
+
+  if (typeof document === 'undefined') return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  return {
+    width,
+    height,
+    drawImage: (source, dx, dy, dw, dh) => ctx.drawImage(source, dx, dy, dw, dh),
+    toBlob: (type, quality) =>
+      new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), type, quality);
+      }),
+  };
+}
+
 export async function compressImage(
   file: File,
   options: CompressOptions = {},
@@ -37,7 +130,7 @@ export async function compressImage(
 
   const { maxWidth, maxHeight, quality } = { ...DEFAULTS, ...options };
 
-  const bitmap = await createImageBitmap(file);
+  const bitmap = await decodeImage(file);
   const { width, height } = bitmap;
 
   // Calculate new dimensions maintaining aspect ratio
@@ -50,30 +143,38 @@ export async function compressImage(
     newHeight = Math.round(height * ratio);
   } else if (file.size < 500 * 1024) {
     // Image is already small and within dimensions — skip compression
-    bitmap.close();
+    bitmap.close?.();
     return file;
   }
 
-  const canvas = new OffscreenCanvas(newWidth, newHeight);
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    bitmap.close();
+  const canvas = createCanvas(newWidth, newHeight);
+  if (!canvas) {
+    bitmap.close?.();
     return file;
   }
 
-  ctx.drawImage(bitmap, 0, 0, newWidth, newHeight);
-  bitmap.close();
+  // For the HTMLImage fallback path we stashed the element on the bitmap;
+  // for createImageBitmap the bitmap itself is a valid CanvasImageSource.
+  const source =
+    (bitmap as unknown as { readonly _element?: HTMLImageElement })._element ??
+    (bitmap as unknown as CanvasImageSource);
+  canvas.drawImage(source, 0, 0, newWidth, newHeight);
+  bitmap.close?.();
 
   // Try WebP first (25-35% smaller), fall back to JPEG
-  let blob = await canvas.convertToBlob({ type: 'image/webp', quality });
+  let blob = await canvas.toBlob('image/webp', quality);
   let ext = '.webp';
   let mime = 'image/webp';
 
-  // If WebP blob is suspiciously large or unsupported, fall back to JPEG
-  if (blob.type !== 'image/webp' || blob.size >= file.size) {
-    blob = await canvas.convertToBlob({ type: 'image/jpeg', quality });
+  // If WebP blob is unavailable, unsupported, or suspiciously large, fall back to JPEG
+  if (!blob || blob.type !== 'image/webp' || blob.size >= file.size) {
+    blob = await canvas.toBlob('image/jpeg', quality);
     ext = '.jpg';
     mime = 'image/jpeg';
+  }
+
+  if (!blob) {
+    return file;
   }
 
   // Only use compressed version if it's actually smaller

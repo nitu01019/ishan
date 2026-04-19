@@ -6,6 +6,7 @@ import SelectControl from '@/components/admin/SelectControl';
 import SliderControl from '@/components/admin/SliderControl';
 import ToggleSwitch from '@/components/admin/ToggleSwitch';
 import { defaultNavConfig } from '@/lib/visual-config-defaults';
+import { useDirtyState } from '@/lib/hooks/useDirtyState';
 
 type NavStyle = 'glass' | 'solid' | 'minimal';
 
@@ -86,7 +87,7 @@ function getMiniNavStyle(
 }
 
 export default function NavStylePage() {
-  const [form, setForm] = useState<NavFormState>({
+  const { value: form, setValue: setForm, markClean } = useDirtyState<NavFormState>({
     logoText: defaultNavConfig.logoText,
     ctaText: defaultNavConfig.ctaText,
     style: defaultNavConfig.style,
@@ -161,6 +162,7 @@ export default function NavStylePage() {
         throw new Error('Failed to save configuration.');
       }
 
+      markClean();
       setSuccess('Nav style saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch {

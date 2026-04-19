@@ -46,27 +46,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     async function checkAuth() {
       try {
-        const res = await fetch('/api/auth/check');
+        const res = await fetch('/api/auth/check', { signal });
+        if (signal.aborted) return;
         const data = await res.json();
+        if (signal.aborted) return;
 
         if (data.authenticated) {
           setAuthenticated(true);
         } else {
           router.push('/admin');
         }
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
         router.push('/admin');
       } finally {
-        setChecking(false);
+        if (!signal.aborted) {
+          setChecking(false);
+        }
       }
     }
 
     async function fetchPortfolioName() {
       try {
-        const res = await fetch('/api/site-config');
+        const res = await fetch('/api/site-config', { signal });
+        if (signal.aborted) return;
         const json = await res.json();
+        if (signal.aborted) return;
         const config = json.data;
         if (config) {
           const name =
@@ -76,13 +86,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             "Neal's Portfolio";
           setPortfolioName(name);
         }
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
         // Keep default on error
       }
     }
 
     checkAuth();
     fetchPortfolioName();
+
+    return () => controller.abort();
   }, [router]);
 
   async function handleLogout() {

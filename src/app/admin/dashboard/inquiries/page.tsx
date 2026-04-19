@@ -51,24 +51,31 @@ export default function InquiriesPage() {
 
   const unreadCount = inquiries.filter((inq) => !inq.isRead).length;
 
-  async function fetchInquiries() {
+  async function fetchInquiries(signal?: AbortSignal) {
     try {
-      const res = await fetch('/api/inquiries');
+      const res = await fetch('/api/inquiries', signal ? { signal } : undefined);
+      if (signal?.aborted) return;
       const data = await res.json();
+      if (signal?.aborted) return;
       if (!res.ok) {
         throw new Error(data.error ?? 'Failed to load inquiries.');
       }
       setInquiries(data.data ?? []);
     } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       const message = err instanceof Error ? err.message : 'Failed to load inquiries.';
       setError(message);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    fetchInquiries();
+    const controller = new AbortController();
+    fetchInquiries(controller.signal);
+    return () => controller.abort();
   }, []);
 
   async function handleMarkAsRead(id: string) {

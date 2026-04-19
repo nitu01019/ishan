@@ -14,10 +14,8 @@
         "npm:@netlify/plugin-nextjs@^5.15.9",
         "npm:@paper-design/shaders-react@^0.0.72",
         "npm:@radix-ui/react-avatar@^1.1.11",
-        "npm:@radix-ui/react-progress@^1.1.8",
         "npm:@radix-ui/react-slot@^1.2.4",
         "npm:@splinetool/react-spline@^4.1.0",
-        "npm:@splinetool/runtime@^1.12.76",
         "npm:@supabase/supabase-js@^2.49.0",
         "npm:@types/node@20",
         "npm:@types/react-dom@^18.3.0",
@@ -38,7 +36,8 @@
         "npm:tailwind-merge@^3.5.0",
         "npm:tailwindcss@^3.4.0",
         "npm:tus-js-client@^4.3.1",
-        "npm:typescript@^5.5.0"
+        "npm:typescript@^5.5.0",
+        "npm:zod@^3.23.8"
       ]
     }
   }

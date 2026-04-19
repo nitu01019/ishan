@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import ToggleSwitch from '@/components/admin/ToggleSwitch';
 import { defaultHeroConfig } from '@/lib/visual-config-defaults';
+import { useDirtyState } from '@/lib/hooks/useDirtyState';
 
 interface FormState {
   brandName: string;
@@ -43,7 +44,7 @@ const EMPTY_FORM: FormState = {
 };
 
 export default function SettingsPage() {
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const { value: form, setValue: setForm, markClean } = useDirtyState<FormState>(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -146,6 +147,7 @@ export default function SettingsPage() {
         throw new Error('Failed to save configuration.');
       }
 
+      markClean();
       setSuccess('Settings saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch {

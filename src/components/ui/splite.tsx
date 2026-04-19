@@ -1,11 +1,11 @@
 'use client'
 
-import { Suspense, lazy, useState, useEffect, useCallback, useRef, Component } from 'react'
+import { useState, useEffect, useCallback, useRef, Component } from 'react'
 import type { ReactNode } from 'react'
+// Use /next subpath: the default entry ships as an async RSC component incompatible with client-only rendering.
+import Spline from '@splinetool/react-spline/next'
 
 const RETRY_DELAY_MS = 500
-
-const Spline = lazy(() => import('@splinetool/react-spline'))
 
 function SplineLoader() {
   return (
@@ -161,22 +161,20 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
 
   return (
     <SplineErrorBoundary key={retryKey} fallback={errorFallback} onError={handleError}>
-      <Suspense fallback={<SplineLoader />}>
-        <div className="relative w-full h-full">
-          {/* Skeleton placeholder shown until Spline fires onLoad */}
-          {!loaded && (
-            <div className="absolute inset-0 z-10">
-              <SplineLoader />
-            </div>
-          )}
-          <div
-            className="w-full h-full transition-opacity duration-700 ease-out"
-            style={{ opacity: loaded ? 1 : 0 }}
-          >
-            <Spline scene={scene} className={className} onLoad={handleLoad} />
+      <div className="relative w-full h-full">
+        {/* Skeleton placeholder shown until Spline fires onLoad */}
+        {!loaded && (
+          <div className="absolute inset-0 z-10">
+            <SplineLoader />
           </div>
+        )}
+        <div
+          className="w-full h-full transition-opacity duration-700 ease-out"
+          style={{ opacity: loaded ? 1 : 0 }}
+        >
+          <Spline scene={scene} className={className} onLoad={handleLoad} />
         </div>
-      </Suspense>
+      </div>
     </SplineErrorBoundary>
   )
 }
